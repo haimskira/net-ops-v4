@@ -42,15 +42,29 @@ def validate_port_range(v: str) -> str:
     if re.match(r'^[a-zA-Z][a-zA-Z0-9_\-]*$', clean):
         return clean
 
-    # 2. Check strict port syntax
+    # 2. Check strict port syntax (Ranges allowed: '80', '80-8080', '80,443')
     if not re.match(r'^\d+(-\d+)?(,\d+(-\d+)?)*$', clean):
-        raise ValueError("Invalid format. Use ports (80, 443) or Service Name")
+        raise ValueError("Invalid format. Use ports (80), ranges (80-81), or lists (80,443)")
     
-    parts = clean.replace('-', ',').split(',')
+    parts = clean.split(',')
     for p in parts:
-        if not p.isdigit() or not (1 <= int(p) <= 65535):
-            raise ValueError(f"Port {p} is out of valid range (1-65535)")
+        if '-' in p:
+            start, end = map(int, p.split('-'))
+            if not (1 <= start <= 65535) or not (1 <= end <= 65535):
+                 raise ValueError(f"Ports {start}-{end} out of range (1-65535)")
+            if start >= end:
+                raise ValueError(f"Invalid range {start}-{end} (Start must be less than End)")
+        else:
+            if not p.isdigit() or not (1 <= int(p) <= 65535):
+                raise ValueError(f"Port {p} is out of valid range (1-65535)")
     return clean
+
+    return clean
+
+def validate_reserved_names(v: str) -> str:
+    if v.lower() == 'test':
+        raise ValueError("The name 'test' is reserved by the Firewall and cannot be used.")
+    return v
 
 # --- Address Objects ---
 
@@ -61,6 +75,10 @@ class AddressObjectCreate(NetOpsBaseModel):
     prefix: Optional[str] = None
     description: Optional[str] = None
     protocol: Optional[str] = None # Ignored for addresses, but allowed to prevent frontend errors
+
+    @field_validator('name')
+    def validate_name_strict(cls, v):
+        return validate_reserved_names(v)
 
     @field_validator('value')
     def validate_content(cls, v, info):
@@ -94,6 +112,10 @@ class ServiceObjectCreate(NetOpsBaseModel):
     protocol: Literal['tcp', 'udp', 'sctp'] = 'tcp'
     value: str # Port or Members
     prefix: Optional[str] = None # Ignored for services, allowed for frontend compatibility
+
+    @field_validator('name')
+    def validate_name_strict(cls, v):
+        return validate_reserved_names(v)
     
     @field_validator('protocol', mode='before')
     def set_default_proto(cls, v):

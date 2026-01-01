@@ -27,24 +27,7 @@ def create_rule():
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
-@rules_bp.route('/approve-single-rule/<int:rule_id>', methods=['POST'])
-def approve_single_rule(rule_id):
-    if not session.get('is_admin'): return jsonify({"message": "Unauthorized"}), 403
-    try:
-        RuleService.approve_request(rule_id, get_user())
-        return jsonify({"status": "success", "message": "Rule approved & created"})
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
 
-@rules_bp.route('/reject-single-rule/<int:rule_id>', methods=['POST'])
-def reject_single_rule(rule_id):
-    if not session.get('is_admin'): return jsonify({"message": "Unauthorized"}), 403
-    try:
-        reason = request.json.get('reason', 'No reason provided')
-        RuleService.reject_request(rule_id, get_user(), reason)
-        return jsonify({"status": "success"})
-    except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
 
 @rules_bp.route('/update-pending-rule/<int:rule_id>', methods=['POST'])
 def update_pending_rule(rule_id):
@@ -59,6 +42,30 @@ def update_pending_rule(rule_id):
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+@rules_bp.route('/approve-single-rule/<int:rule_id>', methods=['POST'])
+def approve_single_rule(rule_id):
+    if not session.get('is_admin'): return jsonify({"message": "Unauthorized"}), 403
+    try:
+        print(f"DEBUG APPROVE: Approving Rule ID {rule_id}")
+        RuleService.approve_request(rule_id, get_user())
+        print(f"DEBUG APPROVE: Success Rule ID {rule_id}")
+        return jsonify({"status": "success", "message": "Rule approved"})
+    except Exception as e:
+        print(f"DEBUG APPROVE: Error {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+@rules_bp.route('/reject-single-rule/<int:rule_id>', methods=['POST'])
+def reject_single_rule(rule_id):
+    if not session.get('is_admin'): return jsonify({"message": "Unauthorized"}), 403
+    try:
+        reason = request.json.get('reason', 'Admin rejected')
+        print(f"DEBUG REJECT: Rejecting Rule ID {rule_id} Reason: {reason}")
+        RuleService.reject_request(rule_id, get_user(), reason)
+        return jsonify({"status": "success", "message": "Rule rejected"})
+    except Exception as e:
+        print(f"DEBUG REJECT: Error {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 @rules_bp.route('/check-shadow', methods=['POST'])
 def check_shadow():
     try:
@@ -68,7 +75,8 @@ def check_shadow():
             source=data.get('source_ip'),
             dest=data.get('destination_ip'),
             from_zone=data.get('from_zone', 'any'),
-            to_zone=data.get('to_zone', 'any')
+            to_zone=data.get('to_zone', 'any'),
+            service_port=data.get('service_port', 'application-default')
         )
         if res.get('exists'):
             return jsonify({
@@ -89,7 +97,8 @@ def get_admin_view_rules():
     return jsonify([{
         "id": r.id, "rule_name": r.rule_name, "requested_by": r.requested_by,
         "source_ip": r.source_ip, "destination_ip": r.destination_ip,
-        "service_port": r.service_port, "status": r.status,
+        "service_port": r.service_port, "application": r.application or 'any',
+        "status": r.status,
         "request_time": r.request_time.strftime("%Y-%m-%d %H:%M")
     } for r in reqs])
 
@@ -97,6 +106,13 @@ def get_admin_view_rules():
 def get_my_requests():
     reqs = RuleRequest.query.filter_by(requested_by=get_user()).order_by(RuleRequest.request_time.desc()).all()
     return jsonify([{
-        "id": r.id, "rule_name": r.rule_name, "status": r.status,
-        "source": r.source_ip, "destination": r.destination_ip
+        "id": r.id, 
+        "rule_name": r.rule_name, 
+        "status": r.status,
+        "source": r.source_ip, 
+        "destination": r.destination_ip,
+        "service_port": r.service_port,
+        "protocol": r.protocol or "tcp",
+        "time": r.request_time.strftime("%Y-%m-%d %H:%M"),
+        "admin_notes": r.admin_notes
     } for r in reqs])

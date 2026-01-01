@@ -63,9 +63,44 @@ class ObjectService(BaseService):
             else:
                 raise ValueError("Unknown object type")
 
-            # 2. Push to FW
+            # 2. Push to Fw with Find-Delete check
+            # PREVENT MERGE/DUPLICATE ERRORS
+            try:
+                # Based on type, determine class for dummy object
+                cls_map = {
+                    'address': PanAddress,
+                    'address-group': PanAddressGroup,
+                    'service': PanService,
+                    'service-group': PanServiceGroup
+                }
+                target_cls = cls_map.get(req.obj_type)
+                
+                # Robust Delete Strategy: Create dummy, attach, delete.
+                # This explicitly sends delete command for the name, clearing conflict.
+                if target_cls:
+                    print(f"DEBUG OBJECT: Attempting cleanup of {req.name}")
+                    dummy = target_cls(req.name)
+                    fw.add(dummy)
+                    try:
+                        dummy.delete()
+                    except Exception as e:
+                        # Ignore "not found" errors, log others
+                        print(f"DEBUG OBJECT: Signup cleanup result: {str(e)}")
+                    # Remove from tree so it doesn't conflict with real add
+                    if dummy in fw.children:
+                        fw.remove(dummy)
+                    else:
+                        print("DEBUG OBJECT WARNING: Dummy object not in fw.children")
+
+            except Exception as e:
+                print(f"DEBUG OBJECT DELETE ERROR: {e}")
+
+            print(f"DEBUG OBJECT: Creating {req.name} Type={req.obj_type} Val={req.value}")
             fw.add(fw_obj)
             fw_obj.create()
+            print(f"DEBUG OBJECT: Success created {req.name}")
+
+
 
             # 3. Update Local DB (Transaction)
             with cls.transaction():

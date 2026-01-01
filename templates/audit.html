@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="en" dir="ltr">
 
 <head>
     <meta charset="UTF-8">
@@ -47,7 +47,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            text-align: right;
+            text-align: left;
         }
 
         thead th {
@@ -149,13 +149,14 @@
     <div class="mb-6 flex justify-between items-center"
         style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
         <div>
-            <h1 class="text-indigo-400 font-bold text-2xl m-0 light-mode:text-indigo-600">יומן פעולות (Audit Logs)</h1>
-            <p class="text-slate-500 text-sm mt-1 light-mode:text-slate-500">מעקב אחר שינויי קונפיגורציה ופעולות מנהל
+            <h1 class="text-indigo-400 font-bold text-2xl m-0 light-mode:text-indigo-600">Audit Logs</h1>
+            <p class="text-slate-500 text-sm mt-1 light-mode:text-slate-500">Track configuration changes and admin
+                actions
             </p>
         </div>
         <button onclick="window.location.reload()"
-            class="bg-slate-700 text-white border-0 py-2 px-5 rounded-xl cursor-pointer hover:bg-slate-600 transition-colors light-mode:bg-slate-200 light-mode:text-slate-700 light-mode:hover:bg-slate-300">רענן
-            לוגים 🔄</button>
+            class="bg-slate-700 text-white border-0 py-2 px-5 rounded-xl cursor-pointer hover:bg-slate-600 transition-colors light-mode:bg-slate-200 light-mode:text-slate-700 light-mode:hover:bg-slate-300">Refresh
+            Logs 🔄</button>
     </div>
 
     <div class="glass-panel">
@@ -163,11 +164,11 @@
             <table>
                 <thead>
                     <tr>
-                        <th style="width: 180px;">זמן</th>
-                        <th style="width: 120px;">משתמש</th>
-                        <th style="width: 150px;">פעולה</th>
-                        <th style="width: 150px;">סוג משאב</th>
-                        <th>שם המשאב / פרטים</th>
+                        <th style="width: 180px;">Time</th>
+                        <th style="width: 120px;">User</th>
+                        <th style="width: 150px;">Action</th>
+                        <th style="width: 150px;">Resource Type</th>
+                        <th>Resource Name / Details</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -185,8 +186,8 @@
                     </tr>
                     {% else %}
                     <tr>
-                        <td colspan="5" style="text-align: center; padding: 40px;" class="text-slate-500">לא נמצאו
-                            פעולות ביומן</td>
+                        <td colspan="5" style="text-align: center; padding: 40px;" class="text-slate-500">No entries
+                            found in log</td>
                     </tr>
                     {% endfor %}
                 </tbody>

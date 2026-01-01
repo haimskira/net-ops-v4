@@ -81,7 +81,11 @@ class SyncService:
         for item in addr_list:
             name = item.get('name')
             if not name or name.lower() in name_to_id: continue
-            val = (item.get('ip-netmask') or item.get('ip_netmask') or item.get('fqdn') or 'any')
+            # Correctly extract value, prioritizing 'value' key
+            val = item.get('value')
+            if not val:
+                val = (item.get('ip-netmask') or item.get('ip_netmask') or item.get('fqdn') or 'any')
+            
             if isinstance(val, list): val = val[0]
             obj = AddressObject(name=name, type='host', value=str(val), is_group=False)
             db_sql.session.add(obj)

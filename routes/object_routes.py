@@ -18,6 +18,8 @@ def create_object_request():
     try:
         # 1. Validation Logic (Strict)
         data = request.json
+        print(f"DEBUG CREATE OBJECT: Received data: {data}") # DEBUG LOG
+
         obj_type = data.get('type')
         
         # Dispatch to correct Pydantic Schema
@@ -26,19 +28,24 @@ def create_object_request():
         elif 'service' in obj_type:
             validated = ServiceObjectCreate(**data)
         else:
+            print("DEBUG CREATE OBJECT: Invalid Type")
             return jsonify({"status": "error", "message": "Invalid object type"}), 400
             
         # 2. Service Logic
         ObjectService.create_request(validated, get_user())
+        print("DEBUG CREATE OBJECT: Success")
         
         return jsonify({"status": "success", "message": "Object request created successfully"})
         
     except ValidationError as e:
         # Return precise Pydantic errors
+        print(f"DEBUG CREATE OBJECT: Validation Error: {e}")
         return jsonify({"status": "error", "message": str(e)}), 422
     except ValueError as e:
+        print(f"DEBUG CREATE OBJECT: Value Error: {e}")
         return jsonify({"status": "error", "message": str(e)}), 400
     except Exception as e:
+        print(f"DEBUG CREATE OBJECT: System Error: {e}")
         return jsonify({"status": "error", "message": "System Error"}), 500
 
 @objects_bp.route('/approve-object/<int:obj_id>', methods=['POST'])
@@ -79,7 +86,8 @@ def get_admin_objects():
     return jsonify([{
         "id": r.id, "name": r.name, "value": r.value, "type": r.obj_type,
         "status": r.status, "requested_by": r.requested_by,
-        "time": r.request_time.strftime("%Y-%m-%d %H:%M") if r.request_time else ""
+        "prefix": r.prefix, "protocol": r.protocol,
+        "request_time": r.request_time.strftime("%Y-%m-%d %H:%M") if r.request_time else ""
     } for r in reqs])
 
 @objects_bp.route('/get-my-objects')
@@ -100,3 +108,26 @@ def get_address_objects_list():
 def get_service_objects_list():
     objs = ServiceObject.query.filter_by(is_group=False).all()
     return jsonify({"status": "success", "services": sorted([o.name for o in objs])})
+
+@objects_bp.route('/check-object-name', methods=['POST'])
+def check_object_name():
+    """Checks if an object name already exists in the DB (Address or Service)."""
+    try:
+        data = request.json
+        name = data.get('name', '').strip()
+        if not name: return jsonify({"exists": False})
+
+        # Check Address Objects
+        addr = AddressObject.query.filter_by(name=name).first()
+        if addr:
+            return jsonify({"exists": True, "type": "Address Object"})
+        
+        # Check Service Objects
+        svc = ServiceObject.query.filter_by(name=name).first()
+        if svc:
+            return jsonify({"exists": True, "type": "Service Object"})
+
+        return jsonify({"exists": False})
+    except Exception as e:
+        print(f"DEBUG CHECK NAME ERROR: {e}")
+        return jsonify({"exists": False}) # Fail safe

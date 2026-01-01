@@ -122,10 +122,20 @@ class SyncManager:
             name = item.get('name')
             if not name or name.lower() in name_to_id: continue
             
-            val = (item.get('ip-netmask') or item.get('ip_netmask') or 
+            if len(name_to_id) < 10:
+                print(f"!!! DEBUG ITEM !!! Name: {name} | RAW: {item}")
+            
+            # prioritize 'value' as confirmed by debug script
+            val = item.get('value')
+            if not val:
+                 val = (item.get('ip-netmask') or item.get('ip_netmask') or 
                    item.get('ip-range') or item.get('ip_range') or 
-                   item.get('fqdn') or item.get('value') or 'any')
+                   item.get('fqdn') or 'any')
+            
             if isinstance(val, list) and val: val = val[0]
+            
+            if len(name_to_id) < 10:
+                print(f"!!! DEBUG EXTRACTED VAL !!!: {val} (Type: {type(val)})")
 
             obj = AddressObject(name=name, type='host', value=str(val), is_group=False)
             db_sql.session.add(obj)

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="en" dir="ltr">
 
 <head>
     <meta charset="UTF-8">
@@ -59,7 +59,7 @@
             padding: 8px !important;
             color: var(--color-slate-100) !important;
             min-height: 50px;
-            text-align: right;
+            text-align: left;
         }
 
         .choices__list--dropdown {
@@ -122,38 +122,38 @@
 
         <div class="flex items-center justify-between mb-8 border-b border-slate-700/50 pb-6">
             <h2 class="text-2xl font-bold text-indigo-400 flex items-center gap-3">
-                <span class="bg-indigo-500/10 p-2 rounded-lg">📦</span> יצירת אובייקט תשתית
+                <span class="bg-indigo-500/10 p-2 rounded-lg">📦</span> Create Infrastructure Object
             </h2>
             <div id="loading-indicator"
                 class="hidden flex items-center gap-2 bg-slate-900/80 px-4 py-2 rounded-full border border-indigo-500/30">
                 <div class="spinner w-3.5 h-3.5 border-2 border-indigo-400 rounded-full"></div>
-                <span class="text-xs font-medium text-slate-300">טוען נתונים...</span>
+                <span class="text-xs font-medium text-slate-300">Loading data...</span>
             </div>
         </div>
 
         <div id="object-form" class="space-y-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label class="block text-sm font-bold text-slate-400 mb-2">סוג אובייקט</label>
+                    <label class="block text-sm font-bold text-slate-400 mb-2">Object Type</label>
                     <select id="type" onchange="updateUI()"
                         class="w-full border border-slate-700 p-3 rounded-xl bg-slate-900 text-slate-200 outline-none">
-                        <option value="address">כתובת (IP Host)</option>
-                        <option value="address-group">קבוצת כתובות (Address Group)</option>
-                        <option value="service">שירות (Port/Protocol)</option>
-                        <option value="service-group">קבוצת שירותים (Service Group)</option>
+                        <option value="address">Address (IP Host)</option>
+                        <option value="address-group">Address Group</option>
+                        <option value="service">Service (Port/Protocol)</option>
+                        <option value="service-group">Service Group</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-bold text-slate-400 mb-2">שם האובייקט</label>
-                    <input type="text" id="name" placeholder="למשל: SRV_PROD_WEB"
+                    <label class="block text-sm font-bold text-slate-400 mb-2">Object Name</label>
+                    <input type="text" id="name" placeholder="e.g. SRV_PROD_WEB"
                         class="w-full border border-slate-700 p-3 rounded-xl bg-slate-900 text-slate-200 outline-none input-focus">
                 </div>
             </div>
 
             <div id="single-value-container" class="space-y-2">
-                <label id="value-label" class="block text-sm font-bold text-slate-400">ערך (IP / Port)</label>
+                <label id="value-label" class="block text-sm font-bold text-slate-400">Value (IP / Port)</label>
                 <div class="flex gap-3">
-                    <input type="text" id="value"
+                    <input type="text" id="value" oninput="updateServiceName()"
                         class="flex-1 border border-slate-700 p-3 rounded-xl bg-slate-900 text-slate-200 outline-none input-focus">
 
                     <select id="prefix_container"
@@ -165,7 +165,7 @@
                         <option value="0">None</option>
                     </select>
 
-                    <select id="protocol_container"
+                    <select id="protocol_container" onchange="updateServiceName()"
                         class="w-32 border border-slate-700 p-3 rounded-xl bg-slate-900 text-slate-200 outline-none hidden">
                         <option value="tcp">TCP</option>
                         <option value="udp">UDP</option>
@@ -174,14 +174,15 @@
             </div>
 
             <div id="multi-select-container" class="hidden space-y-2">
-                <label id="multi-label" class="block text-sm font-bold text-slate-400">בחר חברים מהמערכת</label>
+                <label id="multi-label" class="block text-sm font-bold text-slate-400">Select Members from
+                    System</label>
                 <select id="members_select" class="w-full" multiple></select>
             </div>
         </div>
 
         <button onclick="createObj()" id="btn"
             class="w-full mt-10 bg-indigo-600 text-white font-bold py-4 rounded-2xl hover:bg-indigo-500 transition-all shadow-lg active:scale-[0.98] flex items-center justify-center gap-2">
-            <span>🚀</span> שלח בקשת יצירה לאישור
+            <span>🚀</span> Submit Creation Request
         </button>
 
         <div id="status" class="mt-6 p-4 rounded-xl hidden text-center font-bold border status-animate"></div>
@@ -199,12 +200,18 @@
             const element = document.getElementById('members_select');
             multiSelect = new Choices(element, {
                 removeItemButton: true,
-                placeholderValue: 'חפש אובייקט קיים...',
-                noChoicesText: 'לא נמצאו נתונים',
-                itemSelectText: 'בחר',
+                placeholderValue: 'Search existing object...',
+                noChoicesText: 'No data found',
+                itemSelectText: 'Select',
                 searchEnabled: true,
                 shouldSort: false
             });
+
+            // Add Name Input Listener for manual typing (Address/Groups)
+            document.getElementById('name').addEventListener('input', (e) => {
+                checkNameAvailability(e.target.value);
+            });
+
             updateUI();
         });
 
@@ -219,14 +226,85 @@
             document.getElementById('prefix_container').classList.toggle('hidden', type !== 'address');
             document.getElementById('protocol_container').classList.toggle('hidden', type !== 'service');
 
-            if (type === 'address') valueLabel.innerText = "כתובת IP או Hostname";
-            if (type === 'service') valueLabel.innerText = "פורטים (למשל: 80,443)";
+            if (type === 'address') {
+                valueLabel.innerText = "IP Address or Hostname";
+                document.getElementById('name').readOnly = false;
+                document.getElementById('name').placeholder = "e.g. web-server-01";
+                document.getElementById('name').classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+            if (type === 'service') {
+                valueLabel.innerText = "Ports (e.g. 80,443)";
+                updateServiceName(); // Auto-generates immediately
+            }
 
             if (isGroup) {
                 const endpoint = type === 'address-group' ? '/get-address-objects' : '/get-service-objects';
                 const key = type === 'address-group' ? 'addresses' : 'services';
                 loadChoices(endpoint, key);
+                document.getElementById('name').readOnly = false;
+                document.getElementById('name').classList.remove('opacity-50', 'cursor-not-allowed');
             }
+        }
+
+        function updateServiceName() {
+            const type = document.getElementById('type').value;
+            if (type !== 'service') return;
+
+            const nameInput = document.getElementById('name');
+            const proto = document.getElementById('protocol_container').value.toUpperCase();
+            const val = document.getElementById('value').value.trim().replace(/\s/g, '');
+
+            if (val) {
+                nameInput.value = `${proto}_${val}`;
+                nameInput.readOnly = true;
+                nameInput.classList.add('opacity-50', 'cursor-not-allowed');
+                nameInput.placeholder = "Auto-generated...";
+            } else {
+                nameInput.value = "";
+                nameInput.placeholder = "Enter Port to generate name...";
+            }
+            checkNameAvailability(nameInput.value);
+        }
+
+        let debounceTimer;
+        async function checkNameAvailability(name) {
+            const status = document.getElementById('status');
+            const btn = document.getElementById('btn');
+
+            if (!name || name.trim() === '') {
+                // Clear specific name error if empty (or let other validation handle it)
+                return;
+            }
+
+            // Debounce
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(async () => {
+                try {
+                    const res = await fetch('/check-object-name', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name: name })
+                    });
+                    const data = await res.json();
+
+                    if (data.exists) {
+                        status.innerText = `Error: Object '${name}' already exists (${data.type})`;
+                        status.classList.remove('hidden');
+                        status.className = "mt-6 p-4 rounded-xl text-center font-bold border status-animate bg-rose-500/10 text-rose-400 border-rose-500/30";
+                        btn.disabled = true;
+                        btn.classList.add('opacity-50', 'cursor-not-allowed');
+                    } else {
+                        // Clear error only if it's currently showing a "exists" error
+                        if (status.innerText.includes("already exists")) {
+                            status.classList.add('hidden');
+                            btn.disabled = false;
+                            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                        }
+                    }
+                } catch (e) {
+                    console.error("Check name error", e);
+                }
+            }, 500); // 500ms delay
         }
 
         async function loadChoices(url, dataKey) {
@@ -270,24 +348,24 @@
             const name = document.getElementById('name').value.trim();
             let value;
 
-            if (!name) return showStatus("חובה להזין שם אובייקט", false);
+            if (!name) return showStatus("Object name is required", false);
 
             if (type.includes('group')) {
                 const selected = multiSelect.getValue(true);
-                if (selected.length === 0) return showStatus("קבוצה לא יכולה להיות ריקה", false);
+                if (selected.length === 0) return showStatus("Group cannot be empty", false);
                 value = selected.join(',');
             } else {
                 value = document.getElementById('value').value.trim();
-                if (!value) return showStatus("חובה להזין ערך", false);
+                if (!value) return showStatus("Value is required", false);
 
-                // ולידציה משופרת התואמת ל-Backend
+                // Validation compatible with Backend
                 if (type === 'address') {
                     if (!isValidIPv4(value) && !isValidHostname(value)) {
-                        return showStatus("כתובת IP או Hostname לא תקינים", false);
+                        return showStatus("Invalid IP address or Hostname", false);
                     }
                 }
                 if (type === 'service' && !isValidPortRange(value)) {
-                    return showStatus("פורמט פורטים לא תקין", false);
+                    return showStatus("Invalid port format", false);
                 }
             }
 
@@ -298,7 +376,7 @@
             };
 
             btn.disabled = true;
-            btn.innerHTML = "מעבד בקשה...";
+            btn.innerHTML = "Processing request...";
 
             try {
                 const res = await fetch('/create-object', {
@@ -312,13 +390,13 @@
                     showStatus(data.message, true);
                     resetForm();
                 } else {
-                    showStatus(data.message || "שגיאה בשרת", false);
+                    showStatus(data.message || "Server error", false);
                 }
             } catch (e) {
-                showStatus("תקלת תקשורת", false);
+                showStatus("Communication error", false);
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = "🚀 שלח בקשת יצירה לאישור";
+                btn.innerHTML = "🚀 Submit Creation Request";
             }
         }
     </script>

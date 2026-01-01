@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="en" dir="ltr">
 
 <head>
     <meta charset="UTF-8">
@@ -70,21 +70,22 @@
     <div class="w-full max-w-md login-card backdrop-blur-xl border p-10 rounded-[2.5rem] shadow-2xl">
         <div class="text-center mb-10">
             <span class="text-3xl font-black text-indigo-500 italic tracking-tighter">NET-OPS</span>
-            <h1 class="text-xl font-bold mt-4">כניסה למערכת</h1>
-            <p class="text-slate-500 text-sm mt-2">הזדהות באמצעות Active Directory</p>
+            <h1 class="text-xl font-bold mt-4">System Login</h1>
+            <p class="text-slate-500 text-sm mt-2">Authentication via Active Directory</p>
         </div>
 
         <form method="POST" action="/login" class="space-y-6">
             <div>
-                <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 mr-1">שם
-                    משתמש</label>
+                <label
+                    class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Username</label>
                 <input type="text" name="username" required autofocus
                     class="w-full rounded-2xl p-4 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all placeholder:text-slate-700"
                     placeholder="Username">
             </div>
 
             <div>
-                <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 mr-1">סיסמה</label>
+                <label
+                    class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Password</label>
                 <input type="password" name="password" required
                     class="w-full rounded-2xl p-4 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all placeholder:text-slate-700"
                     placeholder="••••••••">
@@ -99,12 +100,12 @@
 
             <button type="submit"
                 class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-2xl shadow-lg shadow-indigo-900/20 transition-all transform active:scale-[0.98]">
-                התחבר עכשיו
+                Login Now
             </button>
         </form>
 
         <div class="mt-8 text-center">
-            <p class="text-slate-600 text-xs">המערכת מיועדת לצוותי הנדסת רשת ואבטחת מידע בלבד</p>
+            <p class="text-slate-600 text-xs">System intended for Network Engineering and InfoSec teams only</p>
         </div>
     </div>
 

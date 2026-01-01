@@ -93,7 +93,7 @@ def log_viewer_page() -> str:
 def audit_logs_page() -> Union[str, Response]:
     """רק אדמין יכול לראות לוגי מערכת."""
     if not session.get('is_admin'):
-        return render_template('error.html', message="גישה ללוגי ביקורת שמורה למנהלים בלבד"), 403
+        return render_template('error.html', message="Access to audit logs is reserved for administrators only"), 403
     try:
         logs = AuditLog.query.order_by(AuditLog.timestamp.desc()).limit(200).all()
         return render_template('audit.html', logs=logs)
@@ -255,10 +255,10 @@ def commit_changes() -> Response:
     try:
         fw = FwService.get_connection()
         job_id = fw.commit(sync=False)
-        return jsonify({"status": "success", "message": f"ה-Commit נשלח! (ג'וב מספר {job_id})."})
+        return jsonify({"status": "success", "message": f"Commit sent! (Job ID {job_id})."})
     except Exception as e:
         if "705" in str(e) or "704" in str(e):
-            return jsonify({"status": "success", "message": "ה-Commit כבר מתבצע ברקע."})
+            return jsonify({"status": "success", "message": "Commit is already running in background."})
         return jsonify({"status": "error", "message": str(e)}), 500
 
 @ops_bp.route('/job-status/<int:job_id>')
@@ -386,7 +386,142 @@ def trigger_firewall_sync() -> Response:
         if sync_mgr.sync_all(fw_config):
             db_sql.session.add(AuditLog(user=get_username(), action="MANUAL_SYNC", resource_name="Inventory"))
             db_sql.session.commit()
-            return jsonify({"status": "success", "message": "סנכרון הושלם בהצלחה!"})
+            return jsonify({"status": "success", "message": "Sync completed successfully!"})
         return jsonify({"status": "error", "message": "Sync failed"}), 409
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
+
+# --------------------------------------------------------------------------
+# III. Dashboard Data Aggregation APIs
+# --------------------------------------------------------------------------
+
+@ops_bp.route('/api/dashboard/operational')
+def dashboard_operational():
+    """Returns Operational Health metrics: connection, sync time, db size."""
+    try:
+        # 1. Firewall Connection Status
+        fw_status = FwService.check_connection()
+        
+        # 2. Last Sync Time (Mocked for now or fetched from a service state if available)
+        last_sync = "Just now" 
+        
+        # 3. Database Health (Use Config.DATA_DIR directly)
+        db_path = Config.DATA_DIR / 'netops.db'
+        db_size_mb = 0
+        if db_path.exists():
+            db_size_mb = round(db_path.stat().st_size / (1024 * 1024), 2)
+            
+        return jsonify({
+            "fw_connection": fw_status,
+            "last_sync": last_sync,
+            "db_size_mb": db_size_mb,
+            "status": "Healthy" if fw_status and db_size_mb < 100 else "Warning"
+        })
+    except Exception as e:
+        logging.error(f"Dashboard Ops Error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@ops_bp.route('/api/dashboard/work-queue')
+def dashboard_work_queue():
+    """Returns Pending Tasks counts. Filters by user if not admin."""
+    from managers.models import RuleRequest, ObjectRequest
+    try:
+        user = session.get('user')
+        is_admin = session.get('is_admin')
+
+        rule_query = RuleRequest.query.filter_by(status='Pending')
+        obj_query = ObjectRequest.query.filter_by(status='Pending')
+
+        if not is_admin:
+            rule_query = rule_query.filter_by(requested_by=user)
+            obj_query = obj_query.filter_by(requested_by=user)
+
+        pending_rules = rule_query.count()
+        pending_objects = obj_query.count()
+        
+        from datetime import timedelta
+        week_ahead = datetime.utcnow() + timedelta(days=7)
+        expiring_count = SecurityRule.query.filter(
+            SecurityRule.expire_at != None,
+            SecurityRule.expire_at <= week_ahead
+        ).count()
+        
+        return jsonify({
+            "pending_rules": pending_rules,
+            "pending_objects": pending_objects,
+            "expiring_rules": expiring_count
+        })
+    except Exception as e:
+        logging.error(f"Dashboard Queue Error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@ops_bp.route('/api/dashboard/traffic')
+def dashboard_traffic():
+    """Returns aggregated traffic stats for charts."""
+    from sqlalchemy import func
+    try:
+        # 1. Top 5 Apps
+        top_apps = db_sql.session.query(
+            TrafficLog.app, func.count(TrafficLog.id).label('count')
+        ).group_by(TrafficLog.app).order_by(func.count(TrafficLog.id).desc()).limit(5).all()
+        
+        # 2. Action Ratio (Allow vs Deny)
+        actions = db_sql.session.query(
+            TrafficLog.action, func.count(TrafficLog.id)
+        ).group_by(TrafficLog.action).all()
+        
+        # 3. Top Talkers (Sources)
+        top_sources = db_sql.session.query(
+            TrafficLog.source, func.count(TrafficLog.id)
+        ).group_by(TrafficLog.source).order_by(func.count(TrafficLog.id).desc()).limit(5).all()
+
+        return jsonify({
+            "top_apps": [{"name": r[0], "count": r[1]} for r in top_apps] if top_apps else [],
+            "actions": {r[0]: r[1] for r in actions} if actions else {"allow": 0, "deny": 0},
+            "top_sources": [{"ip": r[0], "count": r[1]} for r in top_sources] if top_sources else []
+        })
+    except Exception as e:
+        logging.error(f"Dashboard Traffic Error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@ops_bp.route('/api/dashboard/security')
+def dashboard_security():
+    """Returns Security & Audit stats. Filters by user context."""
+    from sqlalchemy import func
+    try:
+        user = session.get('user')
+        is_admin = session.get('is_admin')
+
+        # 1. Recent Actions Ticker
+        # Admin sees everything, User sees only their own
+        audit_query = AuditLog.query
+        if not is_admin:
+            audit_query = audit_query.filter_by(user=user)
+            
+        recent_logs = audit_query.order_by(AuditLog.timestamp.desc()).limit(5).all()
+        
+        # 2. Top Admins (Activity Count)
+        # Only visible to Admins
+        top_admins = []
+        if is_admin:
+            top_admins = db_sql.session.query(
+                AuditLog.user, func.count(AuditLog.id)
+            ).group_by(AuditLog.user).order_by(func.count(AuditLog.id).desc()).limit(3).all()
+        
+        return jsonify({
+            "recent_actions": [{
+                "user": l.user, 
+                "action": l.action, 
+                "time": l.timestamp.strftime('%H:%M isostime'),
+                "details": (l.details[:50] + '...') if l.details else ''
+            } for l in recent_logs],
+            "top_admins": [{"user": r[0], "count": r[1]} for r in top_admins]
+        })
+    except Exception as e:
+        logging.error(f"Dashboard Security Error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@ops_bp.route('/dashboard')
+def dashboard_page():
+    """Renders the main dashboard page."""
+    return render_template('dashboard.html')

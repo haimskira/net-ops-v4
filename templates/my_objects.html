@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="en" dir="ltr">
 
 <head>
     <meta charset="UTF-8">
@@ -108,8 +108,8 @@
     <div
         class="mb-8 glass-card p-6 rounded-3xl border border-slate-700/50 shadow-2xl flex justify-between items-center light-mode:border-slate-300">
         <div>
-            <h1 class="text-2xl font-bold text-indigo-400">📂 המכולה שלי: סטטוס אובייקטים</h1>
-            <p class="text-slate-500 text-sm mt-1">מעקב אחר בקשות תשתית שנשלחו</p>
+            <h1 class="text-2xl font-bold text-indigo-400">📂 My Container: Object Status</h1>
+            <p class="text-slate-500 text-sm mt-1">Track submitted infrastructure requests</p>
         </div>
         <div id="refresh-indicator"
             class="flex items-center gap-2 bg-slate-900/50 px-4 py-2 rounded-full border border-slate-700 light-mode:bg-slate-200 light-mode:border-slate-300">
@@ -155,10 +155,10 @@
             if (!objects || objects.length === 0) {
                 container.innerHTML = `
                     <div class="text-center py-16 border-2 border-dashed border-slate-800 rounded-3xl light-mode:border-slate-300">
-                        <p class="text-slate-500 italic mb-4">טרם שלחת בקשות ליצירת אובייקטים.</p>
+                        <p class="text-slate-500 italic mb-4">You have not submitted any object requests yet.</p>
                         <button onclick="window.parent.toggleComponent('object-creator')" 
                                 class="bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 px-6 py-2 rounded-xl font-bold transition-all border border-indigo-500/30">
-                            צור אובייקט חדש עכשיו ➔
+                            Create New Object Now ➔
                         </button>
                     </div>`;
                 return;
@@ -179,7 +179,7 @@
                 }
 
                 let icon = status === 'approved' ? '✅' : status === 'rejected' ? '❌' : '⏳';
-                let label = status === 'approved' ? 'אושר' : status === 'rejected' ? 'נדחה' : 'ממתין';
+                let label = status === 'approved' ? 'Approved' : status === 'rejected' ? 'Rejected' : 'Pending';
 
                 return `
                     <div class="obj-card glass-card p-5 rounded-2xl border border-slate-700/30 light-mode:border-slate-300">
@@ -190,7 +190,7 @@
                                     <p class="font-bold text-slate-100 font-mono light-mode:text-slate-800">${o.name}</p>
                                 </div>
                                 <div class="mt-2 flex items-baseline gap-2">
-                                    <span class="text-slate-500 text-xs italic">ערך:</span>
+                                    <span class="text-slate-500 text-xs italic">Value:</span>
                                     <div>${valueContent}</div>
                                 </div>
                             </div>
@@ -200,8 +200,8 @@
                             </div>
                         </div>
                         ${o.admin_notes ? `
-                            <div class="mt-4 p-3 bg-indigo-500/5 border-r-2 border-indigo-500/30 rounded-l-xl">
-                                <p class="text-[10px] text-indigo-400 font-bold uppercase">הערת מנהל</p>
+                            <div class="mt-4 p-3 bg-indigo-500/5 border-l-2 border-indigo-500/30 rounded-r-xl">
+                                <p class="text-[10px] text-indigo-400 font-bold uppercase">Admin Note</p>
                                 <p class="text-sm text-slate-300 italic light-mode:text-slate-700">${o.admin_notes}</p>
                             </div>` : ''}
                     </div>`;

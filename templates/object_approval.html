@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="en" dir="ltr">
 
 <head>
     <meta charset="UTF-8">
@@ -186,21 +186,21 @@
     <div
         class="flex justify-between items-center mb-6 bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl sticky top-0 z-40 light-mode:bg-white light-mode:border-slate-200">
         <div>
-            <h1 class="text-2xl font-bold text-purple-400">ניהול ואישור אובייקטים</h1>
-            <p class="text-slate-500 text-sm">אישור בקשות חדשות וצפייה בהיסטוריית תשתית</p>
+            <h1 class="text-2xl font-bold text-purple-400">Object Management & Approval</h1>
+            <p class="text-slate-500 text-sm">Approve new requests and view infrastructure history</p>
         </div>
 
         <div class="flex gap-4 items-center">
             <div id="bulk-toolbar"
                 class="hidden flex items-center gap-3 bg-slate-800 px-4 py-2 rounded-xl border border-slate-700 light-mode:bg-slate-100 light-mode:border-slate-300">
                 <span id="selected-count" class="text-white font-bold text-sm ml-2 light-mode:text-slate-800">0
-                    נבחרו</span>
+                    Selected</span>
                 <button onclick="bulkReject()"
-                    class="text-rose-400 border border-rose-600/30 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-rose-600 hover:text-white transition-colors">דחה
-                    מסומנים</button>
+                    class="text-rose-400 border border-rose-600/30 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-rose-600 hover:text-white transition-colors">Reject
+                    Selected</button>
                 <button onclick="bulkApprove()"
-                    class="bg-purple-600 hover:bg-purple-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors shadow-lg">אשר
-                    מסומנים</button>
+                    class="bg-purple-600 hover:bg-purple-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors shadow-lg">Approve
+                    Selected</button>
             </div>
 
             <div class="h-8 w-px bg-slate-700 mx-2 light-mode:bg-slate-300"></div>
@@ -218,15 +218,15 @@
         <div
             class="modal-content border border-purple-500/30 p-8 rounded-3xl w-full max-w-sm shadow-2xl text-center pop-in relative overflow-hidden">
             <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-purple-500 to-fuchsia-600"></div>
-            <h3 class="text-2xl font-bold text-white mb-2 light-mode:text-slate-800">אישור אובייקטים</h3>
-            <p id="confirmMessage" class="text-slate-400 text-sm mb-8 px-4 light-mode:text-slate-600">האם אתה בטוח?
-                הפעולה תיצור את האובייקטים בפיירוול.</p>
+            <h3 class="text-2xl font-bold text-white mb-2 light-mode:text-slate-800">Approve Objects</h3>
+            <p id="confirmMessage" class="text-slate-400 text-sm mb-8 px-4 light-mode:text-slate-600">Are you sure?
+                This action will create the objects in the firewall.</p>
             <div class="flex gap-3 justify-center">
                 <button onclick="closeConfirmModal()"
-                    class="px-6 py-2.5 rounded-xl text-slate-400 hover:bg-slate-800 transition-all font-bold text-sm light-mode:text-slate-500 light-mode:hover:bg-slate-100">ביטול</button>
+                    class="px-6 py-2.5 rounded-xl text-slate-400 hover:bg-slate-800 transition-all font-bold text-sm light-mode:text-slate-500 light-mode:hover:bg-slate-100">Cancel</button>
                 <button onclick="executeBulkApprove()"
-                    class="px-6 py-2.5 rounded-xl bg-purple-600 text-white font-bold shadow-lg text-sm transition-all">כן,
-                    בצע אישור</button>
+                    class="px-6 py-2.5 rounded-xl bg-purple-600 text-white font-bold shadow-lg text-sm transition-all">Yes,
+                    Approve</button>
             </div>
         </div>
     </div>
@@ -236,16 +236,16 @@
             class="modal-content border border-slate-700 w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden pop-in light-mode:border-slate-200">
             <div
                 class="p-6 border-b border-slate-800 bg-purple-600/10 flex justify-between items-center light-mode:border-slate-200">
-                <h2 class="text-xl font-bold text-purple-400">עריכת פרטי בקשה</h2>
+                <h2 class="text-xl font-bold text-purple-400">Edit Request Details</h2>
             </div>
             <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-6" id="editForm">
                 <input type="hidden" id="edit_id">
                 <div class="md:col-span-2 space-y-1">
-                    <label class="text-xs text-slate-500 font-bold">שם האובייקט</label>
+                    <label class="text-xs text-slate-500 font-bold">Object Name</label>
                     <input id="edit_name" class="w-full p-2.5 rounded-xl outline-none">
                 </div>
                 <div class="md:col-span-2 space-y-1">
-                    <label class="text-xs text-slate-500 font-bold">ערך (IP או חברי קבוצה מופרדים בפסיק)</label>
+                    <label class="text-xs text-slate-500 font-bold">Value (IP or comma-separated members)</label>
                     <input id="edit_value" class="w-full p-2.5 rounded-xl outline-none">
                 </div>
                 <div class="space-y-1 hidden" id="field_prefix">
@@ -267,25 +267,25 @@
             <div
                 class="p-6 bg-slate-900/50 flex justify-end gap-3 border-t border-slate-800 light-mode:bg-slate-100 light-mode:border-slate-200">
                 <button onclick="closeEdit()"
-                    class="px-6 py-2 rounded-xl text-slate-400 hover:bg-slate-800 transition-all font-bold text-sm light-mode:text-slate-600 light-mode:hover:bg-slate-200">ביטול</button>
+                    class="px-6 py-2 rounded-xl text-slate-400 hover:bg-slate-800 transition-all font-bold text-sm light-mode:text-slate-600 light-mode:hover:bg-slate-200">Cancel</button>
                 <button onclick="saveEdit()"
-                    class="px-8 py-2 rounded-xl bg-purple-600 text-white hover:bg-purple-500 font-bold shadow-lg text-sm">שמור
-                    עדכון</button>
+                    class="px-8 py-2 rounded-xl bg-purple-600 text-white hover:bg-purple-500 font-bold shadow-lg text-sm">Save
+                    Update</button>
             </div>
         </div>
     </div>
 
     <div id="rejectModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal">
         <div class="modal-content border border-slate-700 p-6 rounded-2xl w-full max-w-md shadow-2xl pop-in">
-            <h3 class="text-xl font-bold text-rose-400 mb-4">דחיית בקשה</h3>
+            <h3 class="text-xl font-bold text-rose-400 mb-4">Reject Request</h3>
             <textarea id="rejectReason"
                 class="w-full bg-slate-800 border border-slate-700 rounded-xl p-4 text-white mb-6 h-32 outline-none focus:border-rose-500 light-mode:bg-white light-mode:text-slate-800 light-mode:border-slate-300"
-                placeholder="הסבר למשתמש מדוע הבקשה נדחתה..."></textarea>
+                placeholder="Explain why the request was rejected..."></textarea>
             <div class="flex justify-end gap-3 font-bold">
                 <button onclick="closeRejectModal()"
-                    class="text-slate-400 hover:text-white px-4 py-2 light-mode:text-slate-500 light-mode:hover:text-slate-800">ביטול</button>
-                <button id="confirmRejectBtn" class="bg-rose-600 hover:bg-rose-500 text-white px-6 py-2 rounded-xl">בצע
-                    דחייה</button>
+                    class="text-slate-400 hover:text-white px-4 py-2 light-mode:text-slate-500 light-mode:hover:text-slate-800">Cancel</button>
+                <button id="confirmRejectBtn"
+                    class="bg-rose-600 hover:bg-rose-500 text-white px-6 py-2 rounded-xl">Reject</button>
             </div>
         </div>
     </div>
@@ -311,7 +311,7 @@
 
                 renderUI();
             } catch (e) {
-                document.getElementById('objects-container').innerHTML = '<p class="text-rose-500 text-center py-10">שגיאה בתקשורת עם השרת</p>';
+                document.getElementById('objects-container').innerHTML = '<p class="text-rose-500 text-center py-10">Server communication error</p>';
             }
         }
 
@@ -328,7 +328,7 @@
             if (selectedObjects.size > 0) {
                 toolbar.classList.remove('hidden');
                 toolbar.classList.add('flex');
-                countSpan.innerText = `${selectedObjects.size} נבחרו`;
+                countSpan.innerText = `${selectedObjects.size} Selected`;
             } else {
                 toolbar.classList.add('hidden');
                 toolbar.classList.remove('flex');
@@ -338,7 +338,7 @@
         // --- אישור (Approve) ---
         function bulkApprove() {
             if (selectedObjects.size === 0) return;
-            document.getElementById('confirmMessage').innerHTML = `האם לאשר <b>${selectedObjects.size}</b> אובייקטים ליצירה בפיירוול?`;
+            document.getElementById('confirmMessage').innerHTML = `Approve <b>${selectedObjects.size}</b> objects for creation in firewall?`;
             document.getElementById('confirmModal').classList.remove('hidden');
         }
 
@@ -371,7 +371,7 @@
 
         document.getElementById('confirmRejectBtn').onclick = async function () {
             const reason = document.getElementById('rejectReason').value.trim();
-            if (!reason) return alert("חובה להזין סיבה.");
+            if (!reason) return alert("Reason is required.");
 
             const ids = objectIdToReject ? [objectIdToReject] : Array.from(selectedObjects);
             for (let id of ids) {
@@ -424,14 +424,14 @@
                 });
                 closeEdit();
                 loadObjects();
-            } catch (e) { alert("שגיאה בעדכון"); }
+            } catch (e) { alert("Update Error"); }
         }
 
         // --- בניית הממשק (Render UI) ---
         function renderUI() {
             const container = document.getElementById('objects-container');
             if (!allObjects || allObjects.length === 0) {
-                container.innerHTML = '<p class="text-slate-500 text-center py-20 italic">אין בקשות להצגה.</p>';
+                container.innerHTML = '<p class="text-slate-500 text-center py-20 italic">No requests to display.</p>';
                 return;
             }
 
@@ -440,7 +440,7 @@
                 let statusClass = status === 'approved' ? "obj-approved" : status === 'rejected' ? "obj-rejected" : "obj-pending";
 
                 let badgeColor = status === 'approved' ? 'text-emerald-500 bg-emerald-500/10' : status === 'rejected' ? 'text-rose-500 bg-rose-500/10' : 'text-orange-400 bg-orange-400/10';
-                let statusLabel = status === 'approved' ? '✔ אושר' : status === 'rejected' ? '✘ נדחה' : '⏳ ממתין';
+                let statusLabel = status === 'approved' ? '✔ Approved' : status === 'rejected' ? '✘ Rejected' : '⏳ Pending';
 
                 const type = (obj.obj_type || obj.type || 'ADDRESS').toUpperCase();
                 const isChecked = selectedObjects.has(obj.id) ? 'checked' : '';
@@ -460,12 +460,12 @@
                         ${status === 'pending' ? `<input type="checkbox" class="custom-checkbox" onchange="toggleSelection(${obj.id})" ${isChecked}>` : '<div class="w-5 text-slate-700">#</div>'}
                     </div>
                     
-                    <div class="grid grid-cols-5 gap-6 flex-1 text-right text-sm items-center">
-                        <div><p class="text-slate-500 text-[10px] mb-1 italic">מבקש</p><p class="font-bold text-slate-200 truncate light-mode:text-slate-800">👤 ${obj.requested_by}</p></div>
-                        <div><p class="text-slate-500 text-[10px] mb-1">סוג</p><p class="text-indigo-400 font-black text-[11px] tracking-widest">${type}</p></div>
-                        <div><p class="text-slate-500 text-[10px] mb-1">שם</p><p class="font-mono text-purple-300 font-bold truncate text-xs light-mode:text-purple-600" title="${obj.name}">${obj.name}</p></div>
+                    <div class="grid grid-cols-5 gap-6 flex-1 text-left text-sm items-center">
+                        <div><p class="text-slate-500 text-[10px] mb-1 italic">Requester</p><p class="font-bold text-slate-200 truncate light-mode:text-slate-800">👤 ${obj.requested_by}</p></div>
+                        <div><p class="text-slate-500 text-[10px] mb-1">Type</p><p class="text-indigo-400 font-black text-[11px] tracking-widest">${type}</p></div>
+                        <div><p class="text-slate-500 text-[10px] mb-1">Name</p><p class="font-mono text-purple-300 font-bold truncate text-xs light-mode:text-purple-600" title="${obj.name}">${obj.name}</p></div>
                         <div class="col-span-1">
-                            <p class="text-slate-500 text-[10px] mb-1">ערך / חברים</p>
+                            <p class="text-slate-500 text-[10px] mb-1">Value / Members</p>
                             <div class="max-h-12 overflow-y-auto custom-scroll">${displayVal}</div>
                         </div>
                         <div class="flex flex-col items-center">
@@ -473,22 +473,22 @@
                         </div>
                     </div>
 
-                    <div class="flex gap-2 mr-6 min-w-[150px] justify-end">
+                    <div class="flex gap-2 ml-6 min-w-[150px] justify-end">
                         ${status === 'pending' ? `
                             <button onclick="openEdit(${obj.id})" class="bg-slate-700 p-2 rounded-xl hover:bg-purple-600 transition-all light-mode:bg-slate-200 light-mode:text-slate-600 light-mode:hover:text-white">📝</button>
-                            <button onclick="openRejectModal(${obj.id})" class="text-rose-400 border border-rose-600/30 px-3 py-1.5 rounded-xl text-xs font-bold hover:bg-rose-600 hover:text-white">דחייה</button>
-                            <button onclick="selectedObjects.add(${obj.id}); bulkApprove();" class="bg-purple-600 hover:bg-purple-500 text-white px-5 py-1.5 rounded-xl text-xs font-bold shadow-lg">אשר</button>
+                            <button onclick="openRejectModal(${obj.id})" class="text-rose-400 border border-rose-600/30 px-3 py-1.5 rounded-xl text-xs font-bold hover:bg-rose-600 hover:text-white">Reject</button>
+                            <button onclick="selectedObjects.add(${obj.id}); bulkApprove();" class="bg-purple-600 hover:bg-purple-500 text-white px-5 py-1.5 rounded-xl text-xs font-bold shadow-lg">Approve</button>
                         ` : `
                             <div class="text-left">
-                                <p class="text-slate-500 text-[9px] uppercase font-bold">תאריך פעולה:</p>
+                                <p class="text-slate-500 text-[9px] uppercase font-bold">Action Date:</p>
                                 <p class="text-[10px] text-slate-400 font-mono light-mode:text-slate-600">${obj.request_time || 'N/A'}</p>
                             </div>
                         `}
                     </div>
                 </div>
                 ${obj.admin_notes ? `
-                    <div class="mr-14 mb-4 mt-1 p-3 bg-indigo-500/5 border-r-2 border-indigo-500/20 rounded-l-xl">
-                        <p class="text-xs text-slate-400 italic light-mode:text-slate-600">💬 הערת אדמין: ${obj.admin_notes}</p>
+                    <div class="ml-14 mb-4 mt-1 p-3 bg-indigo-500/5 border-l-2 border-indigo-500/20 rounded-r-xl">
+                        <p class="text-xs text-slate-400 italic light-mode:text-slate-600">💬 Admin Note: ${obj.admin_notes}</p>
                     </div>` : ''}
                 `;
             }).join('');

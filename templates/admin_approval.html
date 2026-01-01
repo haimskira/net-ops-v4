@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="en" dir="ltr">
 
 <head>
     <meta charset="UTF-8">
@@ -169,25 +169,25 @@
         class="flex justify-between items-center mb-6 bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl sticky top-0 z-40">
         <!-- Manually replace bg-slate-900 with generic classes if possible, or assume theme.css overrides .bg-slate-900 -->
         <div>
-            <h1 class="text-2xl font-bold text-indigo-400">ניהול תור חוקות</h1>
-            <p class="text-slate-500 text-sm">אישור, עריכה ומעקב אחר בקשות</p>
+            <h1 class="text-2xl font-bold text-indigo-400">Rule Request Queue</h1>
+            <p class="text-slate-500 text-sm">Approve, edit and track requests</p>
         </div>
 
         <div class="flex gap-4 items-center">
             <div id="bulk-toolbar"
                 class="hidden items-center gap-3 bg-slate-800 px-4 py-2 rounded-xl border border-slate-700">
-                <span id="selected-count" class="text-white font-bold text-sm ml-2">0 נבחרו</span>
+                <span id="selected-count" class="text-white font-bold text-sm ml-2">0 Selected</span>
                 <button onclick="bulkReject()"
-                    class="text-rose-400 border border-rose-600/30 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-rose-600 hover:text-white transition-colors">דחה
-                    מסומנים</button>
+                    class="text-rose-400 border border-rose-600/30 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-rose-600 hover:text-white transition-colors">Reject
+                    Selected</button>
                 <button onclick="bulkApprove()"
-                    class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-lg">אשר
-                    מסומנים</button>
+                    class="bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-lg">Approve
+                    Selected</button>
             </div>
             <div class="h-8 w-px bg-slate-700 mx-2"></div>
             <button onclick="commitAll()"
-                class="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-lg active:scale-95 text-sm">בצע
-                COMMIT סופי</button>
+                class="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-lg active:scale-95 text-sm">Final
+                COMMIT</button>
         </div>
     </div>
 
@@ -199,14 +199,15 @@
             <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-emerald-500 to-green-600"></div>
             <div class="mx-auto w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mb-4"><span
                     class="text-3xl">🛡️</span></div>
-            <h3 class="text-2xl font-bold text-white mb-2">אישור חוקות</h3>
-            <p id="confirmMessage" class="text-slate-400 text-sm mb-8 px-4">החוקות ייווצרו בפיירוול באופן מיידי.</p>
+            <h3 class="text-2xl font-bold text-white mb-2">Approve Rules</h3>
+            <p id="confirmMessage" class="text-slate-400 text-sm mb-8 px-4">Rules will be created on the firewall
+                immediately.</p>
             <div class="flex gap-3 justify-center">
                 <button onclick="closeConfirmModal()"
-                    class="px-6 py-2.5 rounded-xl text-slate-400 hover:bg-slate-800 transition-all font-bold text-sm">ביטול</button>
+                    class="px-6 py-2.5 rounded-xl text-slate-400 hover:bg-slate-800 transition-all font-bold text-sm">Cancel</button>
                 <button onclick="executeBulkApprove()"
-                    class="px-6 py-2.5 rounded-xl bg-emerald-600 text-white font-bold shadow-lg text-sm hover:scale-105 transition-transform">כן,
-                    אשר חוקות</button>
+                    class="px-6 py-2.5 rounded-xl bg-emerald-600 text-white font-bold shadow-lg text-sm hover:scale-105 transition-transform">Yes,
+                    Approve Rules</button>
             </div>
         </div>
     </div>
@@ -215,12 +216,12 @@
         <div
             class="bg-slate-900 border border-slate-700 w-full max-w-3xl rounded-3xl shadow-2xl overflow-hidden pop-in">
             <div class="p-6 border-b border-slate-800 bg-indigo-600/10 flex justify-between items-center">
-                <h2 class="text-xl font-bold text-indigo-400">עריכת פרטי חוקה</h2>
+                <h2 class="text-xl font-bold text-indigo-400">Edit Rule Details</h2>
             </div>
             <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-6" id="editForm">
                 <input type="hidden" id="edit_id">
-                <div class="md:col-span-2 space-y-1"><label class="text-xs text-slate-500 font-bold">שם
-                        חוקה</label><input id="edit_rule_name" class="w-full p-2.5 rounded-xl outline-none"></div>
+                <div class="md:col-span-2 space-y-1"><label class="text-xs text-slate-500 font-bold">Rule
+                        Name</label><input id="edit_rule_name" class="w-full p-2.5 rounded-xl outline-none"></div>
                 <div class="space-y-1"><label class="text-xs text-slate-500 font-bold">From Zone</label><select
                         id="edit_from_zone" class="w-full p-2.5 rounded-xl"></select></div>
                 <div class="space-y-1"><label class="text-xs text-slate-500 font-bold">To Zone</label><select
@@ -237,27 +238,28 @@
             </div>
             <div class="p-6 bg-slate-900/50 flex justify-end gap-3 border-t border-slate-800">
                 <button onclick="closeEdit()"
-                    class="px-6 py-2 rounded-xl text-slate-400 hover:bg-slate-800 font-bold text-sm">ביטול</button>
+                    class="px-6 py-2 rounded-xl text-slate-400 hover:bg-slate-800 font-bold text-sm">Cancel</button>
                 <button onclick="saveEdit()"
-                    class="px-8 py-2 rounded-xl bg-indigo-600 text-white font-bold shadow-lg text-sm">שמור
-                    עדכון</button>
+                    class="px-8 py-2 rounded-xl bg-indigo-600 text-white font-bold shadow-lg text-sm">Save
+                    Update</button>
             </div>
         </div>
     </div>
 
     <div id="rejectModal" class="hidden fixed inset-0 flex items-center justify-center p-4 modal">
         <div class="bg-slate-900 border border-slate-700 p-6 rounded-2xl w-full max-w-md shadow-2xl pop-in">
-            <h3 class="text-xl font-bold text-rose-400 mb-4">דחיית בקשה</h3>
+            <h3 class="text-xl font-bold text-rose-400 mb-4">Reject Request</h3>
             <textarea id="rejectReason"
                 class="w-full bg-slate-800 border border-slate-700 rounded-xl p-4 text-white mb-4 h-32 outline-none"
-                placeholder="למה הבקשה נדחית?"></textarea>
-            <div id="reject-error" class="hidden text-rose-500 text-xs mb-4 font-bold">חובה לציין סיבה לדחייה</div>
+                placeholder="Why is this request being rejected?"></textarea>
+            <div id="reject-error" class="hidden text-rose-500 text-xs mb-4 font-bold">Rejection reason is required
+            </div>
             <div class="flex justify-end gap-3">
                 <button onclick="closeRejectModal()"
-                    class="text-slate-400 hover:text-white px-4 py-2 font-bold">ביטול</button>
+                    class="text-slate-400 hover:text-white px-4 py-2 font-bold">Cancel</button>
                 <button id="confirmRejectBtn"
-                    class="bg-rose-600 hover:bg-rose-500 text-white px-6 py-2 rounded-xl font-bold transition-all">אשר
-                    דחייה</button>
+                    class="bg-rose-600 hover:bg-rose-500 text-white px-6 py-2 rounded-xl font-bold transition-all">Confirm
+                    Reject</button>
             </div>
         </div>
     </div>
@@ -287,7 +289,7 @@
                 const pendingCount = allRules.filter(r => r.status === 'Pending').length;
                 window.parent.postMessage({ type: 'UPDATE_COUNTER', source: 'rules', count: pendingCount }, '*');
                 renderUI(allRules);
-            } catch (e) { showToast("שגיאה בטעינת נתונים", 'error'); }
+            } catch (e) { showToast("Error loading data", 'error'); }
         }
 
         function toggleSelection(id) {
@@ -301,7 +303,7 @@
             // Check for hidden by class list, or just toggle
             if (selectedRules.size > 0) {
                 toolbar.classList.remove('hidden'); toolbar.classList.add('flex');
-                countSpan.innerText = `${selectedRules.size} נבחרו`;
+                countSpan.innerText = `${selectedRules.size} Selected`;
             } else {
                 toolbar.classList.add('hidden'); toolbar.classList.remove('flex');
             }
@@ -310,12 +312,12 @@
         function renderUI(rules) {
             const container = document.getElementById('pending-container');
             // Use slate-500 text for empty which is safe
-            if (!rules || rules.length === 0) { container.innerHTML = '<p class="text-slate-500 text-center py-10 italic">אין חוקות להצגה.</p>'; return; }
+            if (!rules || rules.length === 0) { container.innerHTML = '<p class="text-slate-500 text-center py-10 italic">No rules to display.</p>'; return; }
 
             container.innerHTML = rules.map(r => {
                 const isPending = r.status === 'Pending';
                 let statusClass = r.status === 'Approved' ? "rule-approved shadow-[0_0_15px_rgba(16,185,129,0.1)]" : r.status === 'Rejected' ? "rule-rejected" : "border-slate-700";
-                let statusBadge = r.status === 'Approved' ? '<span class="text-emerald-500 text-xs font-bold bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">אושר ✔</span>' : r.status === 'Rejected' ? '<span class="text-rose-500 text-xs font-bold bg-rose-500/10 px-3 py-1 rounded-full border border-rose-500/20">נדחה ✘</span>' : '<span class="text-orange-400 text-xs font-bold bg-orange-400/10 px-3 py-1 rounded-full border border-orange-400/20">ממתין ⏳</span>';
+                let statusBadge = r.status === 'Approved' ? '<span class="text-emerald-500 text-xs font-bold bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">Approved ✔</span>' : r.status === 'Rejected' ? '<span class="text-rose-500 text-xs font-bold bg-rose-500/10 px-3 py-1 rounded-full border border-rose-500/20">Rejected ✘</span>' : '<span class="text-orange-400 text-xs font-bold bg-orange-400/10 px-3 py-1 rounded-full border border-orange-400/20">Pending ⏳</span>';
 
                 // For rule card bg, use bg-slate-800/40 which is updated by theme.css
                 return `
@@ -323,19 +325,19 @@
                     <div class="ml-4 flex items-center justify-center">
                         ${isPending ? `<input type="checkbox" class="custom-checkbox" onchange="toggleSelection(${r.id})" ${selectedRules.has(r.id) ? 'checked' : ''}>` : '<div class="w-5"></div>'}
                     </div>
-                    <div class="grid grid-cols-6 gap-4 flex-1 text-right text-sm items-center">
-                        <div class="border-l border-slate-700/50 pl-2"><p class="text-slate-500 text-[10px] mb-1 italic">מבקש</p><p class="font-bold text-slate-200 truncate">${r.requested_by || 'מערכת'}</p></div>
-                        <div><p class="text-slate-500 text-[10px] mb-1">חוקה</p><p class="text-indigo-400 text-xs font-bold truncate">${r.rule_name}</p></div>
+                    <div class="grid grid-cols-6 gap-4 flex-1 text-left text-sm items-center">
+                        <div class="border-r border-slate-700/50 pr-2"><p class="text-slate-500 text-[10px] mb-1 italic">Requester</p><p class="font-bold text-slate-200 truncate">${r.requested_by || 'System'}</p></div>
+                        <div><p class="text-slate-500 text-[10px] mb-1">Rule Name</p><p class="text-indigo-400 text-xs font-bold truncate">${r.rule_name}</p></div>
                         <div><p class="text-slate-500 text-[10px] mb-1">Source</p><p class="text-slate-300 font-mono text-xs">${r.source_ip}</p></div>
                         <div><p class="text-slate-500 text-[10px] mb-1">Dest</p><p class="text-slate-300 font-mono text-xs">${r.destination_ip}</p></div>
                         <div><p class="text-slate-500 text-[10px] mb-1">App/Port</p><p class="text-slate-300 font-mono text-xs">${r.application} / ${r.service_port}</p></div>
                         <div class="flex flex-col items-center gap-1">${statusBadge}</div>
                     </div>
-                    <div class="flex gap-2 mr-6 min-w-[160px] justify-end">
+                    <div class="flex gap-2 ml-6 min-w-[160px] justify-end">
                         ${isPending ? `
-                            <button onclick="openEdit(${r.id})" class="bg-slate-700 p-2 rounded-xl hover:bg-indigo-600 transition-all text-white" title="ערוך">📝</button>
-                            <button onclick="openRejectModal(${r.id})" class="text-rose-400 border border-rose-600/30 px-3 py-2 rounded-xl text-[11px] font-bold hover:bg-rose-600 hover:text-white transition-colors">דחייה</button>
-                            <button onclick="handleAction('approve', ${r.id}, false)" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl text-[11px] font-bold shadow-lg shadow-emerald-900/20">אישור</button>
+                            <button onclick="openEdit(${r.id})" class="bg-slate-700 p-2 rounded-xl hover:bg-indigo-600 transition-all text-white" title="Edit">📝</button>
+                            <button onclick="openRejectModal(${r.id})" class="text-rose-400 border border-rose-600/30 px-3 py-2 rounded-xl text-[11px] font-bold hover:bg-rose-600 hover:text-white transition-colors">Reject</button>
+                            <button onclick="handleAction('approve', ${r.id}, false)" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl text-[11px] font-bold shadow-lg shadow-emerald-900/20">Approve</button>
                         ` : `<p class="text-[10px] text-slate-600 font-mono">${r.request_time || ''}</p>`}
                     </div>
                 </div>`;
@@ -345,7 +347,7 @@
         // --- Logic Functions ---
         function bulkApprove() {
             if (selectedRules.size === 0) return;
-            document.getElementById('confirmMessage').innerHTML = `האם אתה בטוח שברצונך לאשר <span class="text-emerald-400 font-bold">${selectedRules.size}</span> חוקות?`;
+            document.getElementById('confirmMessage').innerHTML = `Are you sure you want to approve <span class="text-emerald-400 font-bold">${selectedRules.size}</span> rules?`;
             document.getElementById('confirmModal').classList.remove('hidden');
         }
 
@@ -354,7 +356,7 @@
             const promises = Array.from(selectedRules).map(id => fetch(`/approve-single-rule/${id}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ reason: "Bulk Approval" }) }));
             await Promise.all(promises);
             selectedRules.clear(); updateBulkToolbar(); loadRules();
-            showToast("החוקות אושרו בהצלחה");
+            showToast("Rules approved successfully");
         }
 
         function closeConfirmModal() { document.getElementById('confirmModal').classList.add('hidden'); }
@@ -367,6 +369,14 @@
         }
         function closeRejectModal() { document.getElementById('rejectModal').classList.add('hidden'); }
 
+        function bulkReject() {
+            if (selectedRules.size === 0) return;
+            ruleIdToReject = null;
+            document.getElementById('rejectReason').value = "";
+            document.getElementById('reject-error').classList.add('hidden');
+            document.getElementById('rejectModal').classList.remove('hidden');
+        }
+
         document.getElementById('confirmRejectBtn').onclick = async function () {
             const reason = document.getElementById('rejectReason').value.trim();
             if (!reason) {
@@ -375,11 +385,23 @@
                 setTimeout(() => document.getElementById('rejectReason').classList.remove('shake'), 400);
                 return;
             }
-            const id = ruleIdToReject || Array.from(selectedRules)[0];
-            await fetch(`/reject-single-rule/${id}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ reason: reason }) });
+
+            const ids = ruleIdToReject ? [ruleIdToReject] : Array.from(selectedRules);
+
+            // Execute sequentially or use Promise.all
+            for (let id of ids) {
+                await fetch(`/reject-single-rule/${id}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ reason: reason })
+                });
+            }
+
             if (!ruleIdToReject) selectedRules.clear();
-            closeRejectModal(); loadRules(); updateBulkToolbar();
-            showToast("הבקשה נדחתה");
+            closeRejectModal();
+            loadRules();
+            updateBulkToolbar();
+            showToast(ids.length > 1 ? "Requests rejected" : "Request rejected");
         };
 
         async function handleAction(type, id, commit) {
@@ -388,11 +410,11 @@
                 const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ reason: "Manual Admin Action" }) });
                 const data = await res.json();
                 if (data.status === 'success') {
-                    showToast(type === 'approve' ? "חוקה אושרה ונוצרה" : "חוקה נדחתה");
+                    showToast(type === 'approve' ? "Rule approved and created" : "Rule rejected");
                     if (commit) await commitAll();
                     loadRules();
                 } else { showToast(data.message, 'error'); }
-            } catch (e) { showToast("שגיאת תקשורת", 'error'); }
+            } catch (e) { showToast("Communication Error", 'error'); }
         }
 
         async function commitAll() {
@@ -400,7 +422,7 @@
                 const res = await fetch('/commit', { method: 'POST' });
                 const data = await res.json();
                 showToast(data.message);
-            } catch (e) { showToast("שגיאת Commit", 'error'); }
+            } catch (e) { showToast("Commit Error", 'error'); }
         }
 
         async function openEdit(id) {
@@ -439,7 +461,7 @@
             };
             const res = await fetch(`/update-pending-rule/${id}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
             const result = await res.json();
-            if (result.status === 'success') { showToast("עודכן בהצלחה"); closeEdit(); loadRules(); }
+            if (result.status === 'success') { showToast("Successfully updated"); closeEdit(); loadRules(); }
             else { showToast(result.message, 'error'); }
         }
 

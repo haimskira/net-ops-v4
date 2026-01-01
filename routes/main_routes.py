@@ -55,13 +55,13 @@ def policy_match_page():
 @main_bp.route('/admin-approval-tool')
 def admin_approval_page():
     if not session.get('is_admin'): 
-        return redirect(url_for('main.main_page'))
+        return render_template('error.html', error_message="Access Denied: Admin privileges required."), 403
     return render_template('admin_approval.html')
 
 @main_bp.route('/object-approval-tool')
 def object_approval_page():
     if not session.get('is_admin'): 
-        return redirect(url_for('main.main_page'))
+        return render_template('error.html', error_message="Access Denied: Admin privileges required."), 403
     return render_template('object_approval.html')
 
 @main_bp.route('/my-requests-tool')

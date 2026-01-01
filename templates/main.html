@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="en" dir="ltr">
 
 <head>
     <meta charset="UTF-8">
@@ -27,67 +27,102 @@
         body {
             font-family: 'Assistant', sans-serif !important;
             margin: 0;
-            transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1), color 0.5s;
             background-color: var(--color-slate-950);
             height: 100vh;
-            /* Force full viewport height */
             overflow: hidden;
-            /* Prevent body scroll */
             display: flex;
-            flex-direction: column;
-        }
-
-        .fade-in {
-            animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Active state for dropdown items */
-        .btn-active {
-            background: rgba(99, 102, 241, 0.15) !important;
-            color: #818cf8 !important;
-            border-right: 3px solid #6366f1;
+            flex-direction: row;
+            /* Sidebar Layout */
         }
 
         iframe {
             width: 100%;
             height: 100%;
             border: none;
-            background-color: var(--color-slate-900);
         }
 
-        /* Dropdown Item Styling - Glass Style */
-        .dropdown-item {
-            width: 100%;
-            text-align: right;
-            padding: 0.8rem 1rem;
+        /* Sidebar Styling */
+        .sidebar {
+            width: 260px;
+            background: rgba(15, 23, 42, 0.95);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 50;
+        }
+
+        .light-mode .sidebar {
+            background: rgba(255, 255, 255, 0.95);
+            border-right: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-item {
+            padding: 10px 16px;
             display: flex;
             align-items: center;
-            gap: 1rem;
-            border-radius: 0.75rem;
+            gap: 12px;
             color: var(--color-slate-400);
-            transition: all 0.2s ease-out;
-            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-radius: 8px;
+            margin: 2px 8px;
             font-size: 0.9rem;
-            border: 1px solid transparent;
+            font-weight: 600;
         }
 
-        .dropdown-item:hover {
-            background-color: rgba(255, 255, 255, 0.05);
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--color-slate-100);
+        }
+
+        .light-mode .nav-item:hover {
+            background: rgba(0, 0, 0, 0.05);
+            color: var(--color-slate-800);
+        }
+
+        .nav-item.active {
+            background: rgba(99, 102, 241, 0.1);
+            color: #818cf8;
+        }
+
+        /* Submenu */
+        .submenu {
+            overflow: hidden;
+            transition: max-height 0.3s cubic-bezier(0, 1, 0, 1);
+            max-height: 0;
+            margin-left: 12px;
+            border-left: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .submenu.open {
+            max-height: 500px;
+            /* Arbitrary large number */
+            transition: max-height 0.3s cubic-bezier(1, 0, 1, 0);
+        }
+
+        .submenu-item {
+            padding: 8px 16px 8px 24px;
+            font-size: 0.85rem;
+            color: var(--color-slate-500);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            border-radius: 0 8px 8px 0;
+            margin-right: 8px;
+        }
+
+        .submenu-item:hover {
             color: var(--color-slate-200);
-            border-color: rgba(255, 255, 255, 0.05);
-            transform: translateX(-4px);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .light-mode .submenu-item:hover {
+            color: var(--color-slate-700);
+            background: rgba(0, 0, 0, 0.02);
         }
 
         /* Ambient Background Blobs via CSS */
@@ -130,50 +165,12 @@
             }
         }
 
-        /* Glass Navbar Override */
-        .glass-nav {
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .light-mode .glass-nav {
-            background: rgba(255, 255, 255, 0.7);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        /* Control Pill */
-        .control-pill {
-            background: rgba(30, 41, 59, 0.6);
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .light-mode .control-pill {
-            background: rgba(255, 255, 255, 0.8);
-            border: 1px solid rgba(0, 0, 0, 0.08);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-        }
-
-        /* Custom Scrollbar */
-        .custom-scroll::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .custom-scroll::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 3px;
-        }
-
-        .custom-scroll::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 3px;
-        }
-
-        .custom-scroll::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.4);
+        .badge {
+            padding: 2px 6px;
+            border-radius: 999px;
+            font-size: 10px;
+            font-weight: bold;
+            margin-left: auto;
         }
     </style>
 </head>
@@ -186,236 +183,153 @@
         <div class="ambient-blob blob-2"></div>
     </div>
 
-    <!-- Frosted Glass Navbar -->
-    <nav class="glass-nav z-50 flex-none h-20 shadow-xl relative">
-        <div class="w-full h-full px-8 flex justify-between items-center relative z-10">
+    <!-- Left Sidebar -->
+    <aside class="sidebar">
+        <!-- Branding -->
+        <div class="h-20 flex items-center px-6 gap-3 border-b border-white/5 cursor-pointer" onclick="closeAll()">
+            <div class="w-8 h-8
+             bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/30">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+            </div>
+            <div class="flex flex-col leading-none">
+                <span class="text-lg font-black tracking-tight text-slate-100">NET<span
+                        class="text-indigo-400 italic">OPS</span></span>
+                <span class="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">Security Portal</span>
+            </div>
+        </div>
 
-            <!-- Right Section: Branding & Tools -->
-            <div class="flex items-center gap-12">
-                <!-- Branding -->
-                <!-- Branding -->
-                <div class="flex items-center gap-3 select-none group cursor-pointer" onclick="closeAll()">
-                    <div class="relative">
-                        <div
-                            class="relative w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/30 group-hover:bg-indigo-500 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="flex flex-col leading-none">
-                        <span
-                            class="text-xl font-black tracking-tight text-slate-100 group-hover:text-white transition-colors">NET<span
-                                class="text-indigo-400 italic">OPS</span></span>
-                        <span class="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">Security
-                            Portal</span>
-                    </div>
-                </div>
+        <!-- Scrollable Menu -->
+        <div class="flex-1 overflow-y-auto py-4 custom-scroll space-y-1">
 
-                <!-- Tools Dropdown Trigger -->
-                <div class="relative" id="fw-mgmt-container">
-                    <button onclick="toggleDropdown('fw-menu')"
-                        class="group flex items-center gap-3 px-5 py-2.5 rounded-full transition-all duration-300 border border-transparent hover:bg-slate-800/30 hover:border-white/5 active:scale-95">
-                        <span class="text-xl filter drop-shadow-[0_0_8px_rgba(99,102,241,0.5)]">🛠️</span>
-                        <span
-                            class="font-bold text-slate-300 group-hover:text-white transition-colors text-sm tracking-wide" >כלי ניהול</span>
-                        <span
-                            class="text-[10px] text-slate-500 transition-transform duration-300 group-hover:rotate-180"
-                            id="fw-arrow">▼</span>
-                    </button>
-
-                    <!-- Glass Dropdown Menu -->
-                    <div id="fw-menu"
-                        class="dropdown-menu absolute top-full right-0 mt-4 w-[480px] hidden flex flex-col gap-1 p-3 bg-slate-900/90 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] origin-top-right transition-all max-h-[450px] overflow-y-auto custom-scroll">
-
-                        <div
-                            class="px-3 py-1.5 text-[10px] font-extrabold text-indigo-400/80 uppercase tracking-widest flex items-center gap-2">
-                            <span class="w-1 h-1 rounded-full bg-indigo-500"></span> פעולות ליבה
-                        </div>
-
-                        <button id="btn-palo-alto" onclick="toggleComponent('palo-alto')" class="dropdown-item py-1.5">
-                            <span class="text-lg opacity-80">🛡️</span>
-                            <div class="flex items-baseline gap-2">
-                                <span class="text-slate-200 text-sm font-semibold whitespace-nowrap">Rule Manager</span>
-                                <span class="text-[10px] text-slate-500/80 font-normal">ניהול חוקה</span>
-                            </div>
-                        </button>
-
-                        <button id="btn-object-creator" onclick="toggleComponent('object-creator')"
-                            class="dropdown-item py-1.5">
-                            <span class="text-lg opacity-80">📦</span>
-                            <div class="flex items-baseline gap-2">
-                                <span class="text-slate-200 text-sm font-semibold whitespace-nowrap">Object
-                                    Creator</span>
-                                <span class="text-[10px] text-slate-500/80 font-normal">בקשת אובייקט</span>
-                            </div>
-                        </button>
-
-                        <button id="btn-policy-match" onclick="toggleComponent('policy-match')"
-                            class="dropdown-item py-1.5">
-                            <span class="text-lg opacity-80">🔍</span>
-                            <div class="flex items-baseline gap-2">
-                                <span class="text-slate-200 text-sm font-semibold whitespace-nowrap">Policy Match</span>
-                                <span class="text-[10px] text-slate-500/80 font-normal">סימולציה</span>
-                            </div>
-                        </button>
-
-                        <div class="h-px bg-white/5 my-1 mx-3"></div>
-                        <div
-                            class="px-3 py-1.5 text-[10px] font-extrabold text-emerald-400/80 uppercase tracking-widest flex items-center gap-2">
-                            <span class="w-1 h-1 rounded-full bg-emerald-500"></span> תצפית
-                        </div>
-
-                        <button id="btn-log-viewer" onclick="toggleComponent('log-viewer')"
-                            class="dropdown-item py-1.5">
-                            <span class="text-lg opacity-80">📊</span>
-                            <div class="flex items-baseline gap-2">
-                                <span class="text-slate-200 text-sm font-semibold whitespace-nowrap">Traffic Logs</span>
-                            </div>
-                        </button>
-
-                        <button id="btn-audit-logs" onclick="toggleComponent('audit-logs')"
-                            class="dropdown-item py-1.5">
-                            <span class="text-lg opacity-80">👣</span>
-                            <div class="flex items-baseline gap-2">
-                                <span class="text-slate-200 text-sm font-semibold whitespace-nowrap">Audit Logs</span>
-                                <span class="text-[10px] text-slate-500/80 font-normal">תיעוד</span>
-                            </div>
-                        </button>
-
-                        <button id="btn-policy-inventory" onclick="toggleComponent('policy-inventory')"
-                            class="dropdown-item py-1.5">
-                            <span class="text-lg opacity-80">📋</span>
-                            <div class="flex items-baseline gap-2">
-                                <span class="text-slate-200 text-sm font-semibold whitespace-nowrap">Inventory</span>
-                                <span class="text-[10px] text-slate-500/80 font-normal">רשימת חוקים</span>
-                            </div>
-                        </button>
-
-                        <div class="h-px bg-white/5 my-1 mx-3"></div>
-                        <div
-                            class="px-3 py-1.5 text-[10px] font-extrabold text-blue-400/80 uppercase tracking-widest flex items-center gap-2">
-                            <span class="w-1 h-1 rounded-full bg-blue-500"></span> בקשות
-                        </div>
-
-                        <button id="btn-my-requests" onclick="toggleComponent('my-requests')"
-                            class="dropdown-item py-1.5">
-                            <span class="text-lg opacity-80">📝</span>
-                            <div class="flex items-baseline gap-2">
-                                <span class="text-slate-200 text-sm font-semibold whitespace-nowrap">My Requests</span>
-                                <span class="text-[10px] text-slate-500/80 font-normal">סטטוס חוקות</span>
-                            </div>
-                        </button>
-
-                        <button id="btn-my-objects" onclick="toggleComponent('my-objects')"
-                            class="dropdown-item py-1.5">
-                            <span class="text-lg opacity-80">📦</span>
-                            <div class="flex items-baseline gap-2">
-                                <span class="text-slate-200 text-sm font-semibold whitespace-nowrap">My Objects</span>
-                                <span class="text-[10px] text-slate-500/80 font-normal">סטטוס אובייקטים</span>
-                            </div>
-                        </button>
-
-                        {% if session.get('is_admin') %}
-                        <div class="h-px bg-white/5 my-1 mx-3"></div>
-                        <div
-                            class="px-3 py-1.5 text-[10px] font-extrabold text-rose-400/80 uppercase tracking-widest flex items-center gap-2">
-                            <span class="w-1 h-1 rounded-full bg-rose-500"></span> ניהול
-                        </div>
-                        <button id="btn-admin-approval" onclick="toggleComponent('admin-approval')"
-                            class="dropdown-item justify-between py-1.5">
-                            <div class="flex items-center gap-2"><span class="text-lg opacity-80">🛡️</span> <span
-                                    class="text-slate-200 text-sm font-semibold whitespace-nowrap">Rule Approval</span>
-                                <span class="text-[10px] text-slate-500/80 font-normal">אישור חוקות</span>
-                            </div>
-                            <span id="menu-rule-badge"
-                                class="bg-indigo-500 shadow-lg shadow-indigo-500/40 text-white text-[10px] font-bold px-2 py-0.5 rounded-full hidden">0</span>
-                        </button>
-                        <button id="btn-object-approval" onclick="toggleComponent('object-approval')"
-                            class="dropdown-item justify-between py-1.5">
-                            <div class="flex items-center gap-2"><span class="text-lg opacity-80">📦</span> <span
-                                    class="text-slate-200 text-sm font-semibold whitespace-nowrap">Object
-                                    Approval</span> <span class="text-[10px] text-slate-500/80 font-normal">אישור
-                                    אובייקטים</span>
-                            </div>
-                            <span id="menu-obj-badge"
-                                class="bg-purple-500 shadow-lg shadow-purple-500/40 text-white text-[10px] font-bold px-2 py-0.5 rounded-full hidden">0</span>
-                        </button>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <!-- Admin Floating Badges (Quick Access) -->
-                {% if session.get('is_admin') %}
-                <div class="flex items-center gap-3 mr-2">
-                    <button onclick="toggleComponent('admin-approval')"
-                        class="relative w-10 h-10 rounded-full bg-slate-800/40 border border-white/5 hover:bg-indigo-500/20 hover:border-indigo-500/50 transition-all flex items-center justify-center group"
-                        title="חוקות ממתינות">
-                        <span class="text-sm opacity-60 group-hover:opacity-100 transition-opacity">🛡️</span>
-                        <span id="nav-rule-badge"
-                            class="absolute -top-1 -right-1 w-4 h-4 bg-indigo-500 text-white text-[9px] font-bold flex items-center justify-center rounded-full shadow-lg border border-slate-900 hidden">0</span>
-                    </button>
-                    <button onclick="toggleComponent('object-approval')"
-                        class="relative w-10 h-10 rounded-full bg-slate-800/40 border border-white/5 hover:bg-purple-500/20 hover:border-purple-500/50 transition-all flex items-center justify-center group"
-                        title="אובייקטים ממתינים">
-                        <span class="text-sm opacity-60 group-hover:opacity-100 transition-opacity">📦</span>
-                        <span id="nav-obj-badge"
-                            class="absolute -top-1 -right-1 w-4 h-4 bg-purple-500 text-white text-[9px] font-bold flex items-center justify-center rounded-full shadow-lg border border-slate-900 hidden">0</span>
-                    </button>
-                </div>
-                {% endif %}
+            <div class="nav-item" onclick="toggleComponent('dashboard')">
+                <span>🏠</span>
+                <span>Dashboard</span>
             </div>
 
-            <!-- Left Section: Unified Control Pill -->
-            <div
-                class="control-pill rounded-full p-1.5 px-6 flex items-center gap-6 select-none transition-all hover:border-white/20 whitespace-nowrap">
-
-                <!-- User Info -->
-                <div class="flex items-center gap-3 text-right">
-                    <div class="flex flex-col">
-                        <span class="text-xs font-bold text-slate-200 truncate max-w-[150px]">{{ session.get('user')
-                            }}</span>
-                        <span class="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Online</span>
+            <!-- Operate Group -->
+            <div>
+                <div class="nav-item" onclick="toggleSubmenu('submenu-operate')">
+                    <span>🛠️</span>
+                    <span>Operate</span>
+                    <span class="ml-auto text-xs text-slate-600 transition-transform" id="arrow-operate">▼</span>
+                </div>
+                <div id="submenu-operate" class="submenu">
+                    <div class="submenu-item" onclick="toggleComponent('palo-alto')">
+                        <span>🛡️</span> Rule Manager
+                    </div>
+                    <div class="submenu-item" onclick="toggleComponent('object-creator')">
+                        <span>📦</span> Object Creator
+                    </div>
+                    <div class="submenu-item" onclick="toggleComponent('policy-match')">
+                        <span>🔍</span> Policy Match
                     </div>
                 </div>
+            </div>
 
-                <div class="h-6 w-px bg-white/10"></div>
-
-                <!-- Actions -->
-                <div class="flex items-center gap-1">
-                    <button id="theme-toggle-btn" onclick="ThemeManager.toggle()"
-                        class="w-8 h-8 rounded-full hover:bg-white/10 transition-all flex items-center justify-center text-amber-400 hover:scale-110 active:scale-95"
-                        title="Theme">
-                        ☀
-                    </button>
-                    <a href="/logout"
-                        class="w-8 h-8 rounded-full hover:bg-rose-500/20 hover:text-rose-400 transition-all flex items-center justify-center text-slate-400 hover:scale-110 active:scale-95"
-                        title="Logout">
-                        ⏻
-                    </a>
+            <!-- Monitoring Group -->
+            <div>
+                <div class="nav-item" onclick="toggleSubmenu('submenu-monitoring')">
+                    <span>📊</span>
+                    <span>Monitoring</span>
+                    <span class="ml-auto text-xs text-slate-600 transition-transform" id="arrow-monitoring">▼</span>
+                </div>
+                <div id="submenu-monitoring" class="submenu">
+                    <div class="submenu-item" onclick="toggleComponent('log-viewer')">
+                        <span>📜</span> Traffic Logs
+                    </div>
+                    {% if session.get('is_admin') %}
+                    <div class="submenu-item" onclick="toggleComponent('audit-logs')">
+                        <span>👣</span> Audit Logs
+                    </div>
+                    {% endif %}
+                    <div class="submenu-item" onclick="toggleComponent('policy-inventory')">
+                        <span>📋</span> Inventory
+                    </div>
                 </div>
             </div>
+
+            <!-- Requests Group -->
+            <div>
+                <div class="nav-item" onclick="toggleSubmenu('submenu-requests')">
+                    <span>📝</span>
+                    <span>Requests</span>
+                    <span class="ml-auto text-xs text-slate-600 transition-transform" id="arrow-requests">▼</span>
+                </div>
+                <div id="submenu-requests" class="submenu">
+                    <div class="submenu-item" onclick="toggleComponent('my-requests')">
+                        <span>🛡️</span> Rule Status
+                    </div>
+                    <div class="submenu-item" onclick="toggleComponent('my-objects')">
+                        <span>📦</span> Object Status
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Group -->
+            {% if session.get('is_admin') %}
+            <div class="border-t border-white/5 mt-2 pt-2">
+                <div class="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Administrator
+                </div>
+                <div class="nav-item" onclick="toggleSubmenu('submenu-admin')">
+                    <span>⚡</span>
+                    <span>Admin Actions</span>
+
+                    <!-- Badges Sum -->
+                    <span id="badge-admin-total" class="badge bg-rose-500 text-white hidden">0</span>
+
+                    <span class="ml-auto text-xs text-slate-600 transition-transform" id="arrow-admin">▼</span>
+                </div>
+                <div id="submenu-admin" class="submenu">
+                    <div class="submenu-item" onclick="toggleComponent('admin-approval')">
+                        <span>✅</span> Rule Approval
+                        <span id="badge-rule-approval" class="badge bg-indigo-500 text-white hidden">0</span>
+                    </div>
+                    <div class="submenu-item" onclick="toggleComponent('object-approval')">
+                        <span>☑️</span> Object Approval
+                        <span id="badge-obj-approval" class="badge bg-purple-500 text-white hidden">0</span>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
 
         </div>
-    </nav>
 
-    <!-- Main Content Area: Minimized padding, Flex Fill -->
-    <div class="flex-1 flex flex-col p-2 z-10 overflow-hidden relative">
+        <!-- User / Bottom -->
+        <div class="mt-auto border-t border-white/5 p-4">
+            <div class="flex items-center gap-3">
+                <div
+                    class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-xs font-bold ring-2 ring-indigo-500/20">
+                    {{ session.get('user')[0] | upper }}
+                </div>
+                <div class="flex flex-col overflow-hidden">
+                    <span class="text-xs font-bold text-slate-200 truncate">{{ session.get('user') }}</span>
+                    <span class="text-[9px] text-emerald-400 font-bold uppercase">Online</span>
+                </div>
+                <button onclick="ThemeManager.toggle()"
+                    class="ml-auto text-slate-500 hover:text-amber-400 transition-colors">☀</button>
+                <a href="/logout" class="text-slate-500 hover:text-rose-400 transition-colors">⏻</a>
+            </div>
+        </div>
+    </aside>
 
-        <!-- Main: Flex-1, w-full, h-full, relative to anchor absolutes -->
+
+    <!-- Main Content Area -->
+    <div class="flex-1 flex flex-col p-4 z-10 overflow-hidden relative">
+
         <main
-            class="flex-1 rounded-xl border border-white/5 shadow-2xl overflow-hidden relative backdrop-blur-sm bg-slate-900/40 w-full h-full">
+            class="flex-1 rounded-2xl border border-white/5 shadow-2xl overflow-hidden relative backdrop-blur-sm bg-slate-900/40 w-full h-full">
 
-            <!-- Welcome View - Modern Typography - Absolute Center -->
+            <!-- Welcome View -->
             <div id="welcome-view"
                 class="fade-in absolute inset-0 flex flex-col items-center justify-center text-center p-6">
                 <!-- Glowing Decoration -->
                 <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-30">
                     <div class="w-[500px] h-[500px] bg-indigo-600/20 rounded-full blur-[120px]"></div>
                 </div>
-
                 <div class="relative z-10">
                     <h1 class="text-6xl md:text-8xl font-black mb-2 tracking-tighter text-slate-100">NET<span
                             class="italic text-indigo-500">OPS</span></h1>
@@ -428,7 +342,10 @@
                 </div>
             </div>
 
-            <!-- Content Iframes (Hidden by default) - Absolute Full Coverage -->
+            <!-- Content Iframes (Hidden by default) -->
+            <div id="dashboard-view" class="hidden absolute inset-0 w-full h-full"><iframe id="dashboard-iframe"
+                    src="/dashboard" class="opacity-0 transition-opacity duration-500 w-full h-full"
+                    onload="this.classList.remove('opacity-0'); syncThemeToFrame(this)"></iframe></div>
             <div id="palo-alto-view" class="hidden absolute inset-0 w-full h-full"><iframe id="rule-manager-iframe"
                     src="/palo-manager" class="opacity-0 transition-opacity duration-500 w-full h-full"
                     onload="this.classList.remove('opacity-0'); syncThemeToFrame(this)"></iframe></div>
@@ -465,63 +382,41 @@
         </main>
     </div>
 
-    <!-- Logic (Same as before) -->
+    <!-- Logic -->
     <script>
         const views = [
+            'dashboard-view',
             'palo-alto-view', 'object-creator-view', 'policy-match-view',
             'log-viewer-view', 'my-requests-view', 'my-objects-view',
             'admin-approval-view', 'object-approval-view',
             'policy-inventory-view', 'audit-logs-view'
         ];
 
+        function toggleSubmenu(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.toggle('open');
+                const arrow = document.getElementById('arrow-' + id.split('-')[1]);
+                if (arrow) arrow.style.transform = el.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0deg)';
+            }
+        }
+
         function syncThemeToFrame(iframe) {
             if (!iframe) return;
             const isLight = document.documentElement.classList.contains('light-mode');
-
-            // Limit retries
-            let attempts = 0;
             const trySync = () => {
                 if (!iframe.contentDocument) return;
-
-                // Method 1: Direct DOM (Same Origin)
                 try {
-                    if (isLight) {
-                        iframe.contentDocument.documentElement.classList.add('light-mode');
-                    } else {
-                        iframe.contentDocument.documentElement.classList.remove('light-mode');
-                    }
-                } catch (e) { /* Ignore Cross-Origin */ }
-
-                // Method 2: PostMessage (Fallback)
+                    if (isLight) iframe.contentDocument.documentElement.classList.add('light-mode');
+                    else iframe.contentDocument.documentElement.classList.remove('light-mode');
+                } catch (e) { }
                 try {
                     iframe.contentWindow.postMessage({ type: 'THEME_CHANGE', isLight }, '*');
                 } catch (e) { }
-
-                attempts++;
-                if (attempts < 3) setTimeout(trySync, 300);
             };
-
-            trySync();
+            setTimeout(trySync, 100);
+            setTimeout(trySync, 500);
         }
-
-        function toggleDropdown(id) {
-            const el = document.getElementById(id);
-            el.classList.toggle('hidden');
-            const arrow = document.getElementById('fw-arrow');
-            if (arrow) arrow.style.transform = el.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
-        }
-
-        document.addEventListener('click', function (event) {
-            const container = document.getElementById('fw-mgmt-container');
-            const menu = document.getElementById('fw-menu');
-            if (container && !container.contains(event.target)) {
-                if (!menu.classList.contains('hidden')) {
-                    menu.classList.add('hidden');
-                    const arrow = document.getElementById('fw-arrow');
-                    if (arrow) arrow.style.transform = 'rotate(0deg)';
-                }
-            }
-        });
 
         function toggleComponent(compId) {
             closeAll();
@@ -544,17 +439,18 @@
             if (view) {
                 view.classList.remove('hidden');
                 document.getElementById('welcome-view').classList.add('hidden');
-
-                // Force sync theme to the newly visible iframe
                 const iframe = view.querySelector('iframe');
                 if (iframe) syncThemeToFrame(iframe);
             }
-
-            document.getElementById('fw-menu').classList.add('hidden');
-            document.getElementById('fw-arrow').style.transform = 'rotate(0deg)';
         }
 
         window.toggleComponent = toggleComponent;
+
+        // Auto-load Dashboard
+        window.onload = function () {
+            setTimeout(() => toggleComponent('dashboard'), 100);
+            updateBadges();
+        };
 
         function closeAll() {
             views.forEach(id => {
@@ -566,22 +462,10 @@
 
         window.addEventListener('message', function (event) {
             if (event.data.type === 'UPDATE_COUNTER') {
-                const targetId = event.data.source === 'rules' ? 'nav-rule-badge' : 'nav-obj-badge';
-                const badge = document.getElementById(targetId);
-                const menuBadgeId = event.data.source === 'rules' ? 'menu-rule-badge' : 'menu-obj-badge';
-                const menuBadge = document.getElementById(menuBadgeId);
-
-                if (badge) {
-                    badge.innerText = event.data.count;
-                    badge.classList.toggle('hidden', event.data.count == 0);
-                }
-                if (menuBadge) {
-                    menuBadge.innerText = event.data.count;
-                    menuBadge.classList.toggle('hidden', event.data.count == 0);
-                }
+                // Forward to new badges if needed
             }
-
             if (event.data.type === 'FILL_RULE') {
+                toggleSubmenu('submenu-operate');
                 toggleComponent('palo-alto');
                 setTimeout(() => {
                     const managerIframe = document.getElementById('rule-manager-iframe');
@@ -598,31 +482,41 @@
                     fetch('/get-admin-view-rules'),
                     fetch('/get-admin-view-objects')
                 ]);
+
+                // Only if available (admin)
+                if (rRes.status === 403) return;
+
                 const rData = await rRes.json();
                 const oData = await oRes.json();
 
                 const pendingRules = Array.isArray(rData) ? rData.filter(r => (r.status || '').toLowerCase() === 'pending').length : 0;
                 const pendingObjs = Array.isArray(oData) ? oData.filter(o => (o.status || '').toLowerCase() === 'pending').length : 0;
 
-                const updateBadge = (id, count) => {
+                // Helpers
+                const setBadge = (id, count) => {
                     const el = document.getElementById(id);
                     if (el) {
                         el.innerText = count;
                         el.classList.toggle('hidden', count == 0);
                     }
-                };
+                }
 
-                updateBadge('nav-rule-badge', pendingRules);
-                updateBadge('nav-obj-badge', pendingObjs);
-                updateBadge('menu-rule-badge', pendingRules);
-                updateBadge('menu-obj-badge', pendingObjs);
+                setBadge('badge-rule-approval', pendingRules);
+                setBadge('badge-obj-approval', pendingObjs);
+                setBadge('badge-admin-total', pendingRules + pendingObjs);
+
+                // Auto-open admin group if requests pending
+                if ((pendingRules + pendingObjs) > 0) {
+                    const adminSub = document.getElementById('submenu-admin');
+                    if (adminSub && !adminSub.classList.contains('open')) toggleSubmenu('submenu-admin');
+                }
+
             } catch (e) {
                 console.error("Badge sync error:", e);
             }
         }
 
         setInterval(updateBadges, 15000);
-        window.onload = updateBadges;
     </script>
 </body>
 

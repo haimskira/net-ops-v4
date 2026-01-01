@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="en" dir="ltr">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>שגיאה | NetOps Pro</title>
+    <title>Error | NetOps Pro</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
     <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
@@ -100,11 +100,11 @@
 <body>
     <div class="error-card">
         <div class="icon-circle">!</div>
-        <h1>אופס, משהו השתבש</h1>
+        <h1>Oops, Something Went Wrong</h1>
         <p>
-            {{ message if message else "אין לך הרשאות מתאימות לגשת לנתיב זה או שהדף אינו קיים." }}
+            {{ message if message else "You do not have permission to access this path or the page does not exist." }}
         </p>
-        <a href="/" class="btn-home" target="_top">חזרה לדף הבית</a>
+        <a href="/" class="btn-home" target="_top">Back to Home</a>
     </div>
 </body>
 

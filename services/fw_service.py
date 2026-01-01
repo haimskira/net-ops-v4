@@ -40,6 +40,17 @@ class FwService(BaseService):
         return Firewall(Config.FW_IP, api_key=Config.API_KEY, verify=False, timeout=60)
 
     @staticmethod
+    def check_connection() -> bool:
+        """Verifies actual connectivity to the Firewall."""
+        try:
+            fw = FwService.get_connection()
+            # Minimal lightweight call to verify auth and reachability
+            fw.refresh_system_info() 
+            return True
+        except Exception:
+            return False
+
+    @staticmethod
     def sanitize_ip(val: str) -> str:
         if not val: return ""
         return re.sub(r'[^0-9\.\-\/]', '', val)
@@ -76,7 +87,7 @@ class FwService(BaseService):
         return cls.parse_ip_to_set(db_obj.value or obj_name)
 
     @classmethod
-    def check_shadow_rule(cls, source: str, dest: str, from_zone: str, to_zone: str) -> Dict[str, Any]:
+    def check_shadow_rule(cls, source: str, dest: str, from_zone: str, to_zone: str, service_port: str = 'any') -> Dict[str, Any]:
         """
         Advanced Policy Match Engine.
         Returns passing rule if traffic is already allowed.
@@ -95,16 +106,50 @@ class FwService(BaseService):
 
         for rule in query.all():
             # Source Check
-            r_src = IPSet()
-            for s in rule.sources: r_src.update(cls.flatten_address(s.name))
+            # If no sources linked, likely 'any' (failed to link) or explicit 'any'. Treat as 0.0.0.0/0
+            if not rule.sources:
+                r_src = IPSet(['0.0.0.0/0'])
+            else:
+                r_src = IPSet()
+                for s in rule.sources: r_src.update(cls.flatten_address(s.name))
+            
             if not src_set.issubset(r_src): continue
 
             # Dest Check
-            r_dst = IPSet()
-            for d in rule.destinations: r_dst.update(cls.flatten_address(d.name))
+            if not rule.destinations:
+                r_dst = IPSet(['0.0.0.0/0'])
+            else:
+                r_dst = IPSet()
+                for d in rule.destinations: r_dst.update(cls.flatten_address(d.name))
+            
             if not dst_set.issubset(r_dst): continue
 
-            return {"exists": True, "rule": rule.name, "action": rule.action}
+            # Service Check (Technical Match)
+            # If request is specific port, rule must include it or be 'any'/'application-default'
+            
+            # If no services linked, treat as ANY/Application-Default
+            if not rule.services:
+                 return {"exists": True, "rule": rule.name, "action": rule.action}
+
+            # Simplified Logic: Check if rule has 'any', 'application-default' or the specific service object
+            
+            # TODO: Add deep port resolution (e.g. 'web-browsing' -> 80). 
+            # For now, string match against rule services is a reasonable start given "application-default" usage.
+            
+            rule_services = [s.name.lower() for s in rule.services]
+            if 'any' in rule_services or 'application-default' in rule_services:
+                return {"exists": True, "rule": rule.name, "action": rule.action}
+            
+            # If user asks for 'tcp-80' and rule has 'tcp-80', match.
+            # If user asks for '80', checking direct match might fail if object is named 'http'.
+            # Assuming user inputs Object Name or Port that lines up with DB conventions for now.
+            
+            input_svc = service_port.lower()
+            if input_svc in rule_services:
+                 return {"exists": True, "rule": rule.name, "action": rule.action}
+
+            # If we reached here, IP matched but Service didn't. Continue to next rule.
+            continue
 
         return {"exists": False}
 

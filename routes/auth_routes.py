@@ -40,7 +40,7 @@ def login():
             session['is_admin'] = is_admin
             return redirect(url_for('main.main_page'))
         else:
-            error = "שם משתמש או סיסמה שגויים (LDAP/Local)"
+            error = "Incorrect username or password (LDAP/Local)"
             
     return render_template('login.html', error=error)
 

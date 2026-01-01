@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="en" dir="ltr">
 
 <head>
     <meta charset="UTF-8">
@@ -93,7 +93,7 @@
         <div class="relative w-full md:w-96">
             <span class="absolute inset-y-0 right-3 flex items-center text-slate-400">🔍</span>
             <input type="text" id="logSearch" oninput="renderLogs()"
-                placeholder="חיפוש חופשי (IP, Zone, App, Action...)"
+                placeholder="Free Search (IP, Zone, App, Action...)"
                 class="search-input w-full pr-10 pl-4 py-2 rounded-lg text-sm">
         </div>
 
@@ -101,11 +101,11 @@
             <button id="toggleLogsBtn" onclick="toggleLogs()"
                 class="flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm transition-all bg-indigo-600 hover:bg-indigo-500 shadow-lg shadow-indigo-500/20 text-white">
                 <span id="btnIcon">⏸️</span>
-                <span id="btnText">עצור לוגים</span>
+                <span id="btnText">Pause Logs</span>
             </button>
             <span id="logCounter"
                 class="text-xs text-slate-400 bg-slate-900 px-3 py-2 rounded-lg border border-slate-700 font-mono">
-                0 לוגים בזיכרון
+                0 Logs in memory
             </span>
         </div>
     </div>
@@ -130,11 +130,11 @@
         </div>
     </div>
 
-    <div id="context-menu" class="hidden absolute glass-panel rounded-xl shadow-2xl p-1 z-50 min-w-[180px]" dir="rtl">
+    <div id="context-menu" class="hidden absolute glass-panel rounded-xl shadow-2xl p-1 z-50 min-w-[180px]" dir="ltr">
         <button onclick="createRuleFromMenu()"
-            class="w-full text-right px-4 py-2 hover:bg-indigo-600 rounded-lg flex items-center gap-2 transition-colors text-slate-200 hover:text-white">
+            class="w-full text-left px-4 py-2 hover:bg-indigo-600 rounded-lg flex items-center gap-2 transition-colors text-slate-200 hover:text-white">
             <span>🛡️</span>
-            <span class="text-sm font-bold">צור חוקה ב-Rule Manager</span>
+            <span class="text-sm font-bold">Create Rule in Rule Manager</span>
         </button>
     </div>
 
@@ -148,7 +148,7 @@
             try {
                 const res = await fetch('/get-live-logs');
                 allLogs = await res.json();
-                document.getElementById('logCounter').innerText = `${allLogs.length} לוגים בזיכרון`;
+                document.getElementById('logCounter').innerText = `${allLogs.length} Logs in memory`;
                 renderLogs();
             } catch (e) { console.error("Error fetching logs:", e); }
         }
@@ -164,7 +164,7 @@
             });
 
             if (filteredLogs.length === 0) {
-                body.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-500 italic">אין לוגים להצגה...</td></tr>';
+                body.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-500 italic">No logs to display...</td></tr>';
                 return;
             }
 
@@ -236,10 +236,10 @@
             const text = document.getElementById('btnText');
             if (isPaused) {
                 btn.className = "flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm transition-all bg-emerald-600 hover:bg-emerald-500 shadow-lg shadow-emerald-500/20 text-white";
-                icon.innerText = "▶️"; text.innerText = "המשך לוגים";
+                icon.innerText = "▶️"; text.innerText = "Resume Logs";
             } else {
                 btn.className = "flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm transition-all bg-indigo-600 hover:bg-indigo-500 shadow-lg shadow-indigo-500/20 text-white";
-                icon.innerText = "⏸️"; text.innerText = "עצור לוגים";
+                icon.innerText = "⏸️"; text.innerText = "Pause Logs";
                 fetchLogs();
             }
         }

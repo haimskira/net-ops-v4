@@ -49,31 +49,55 @@ class RuleService(BaseService):
         fw = FwService.get_connection()
         
         # Ensure Service Port Object exists
-        svc_name = req.service_port
-        if svc_name not in ['any', 'application-default'] and re.match(r'^\d', svc_name):
+        svc_str = str(req.service_port or 'application-default').strip()
+        svc_name = svc_str # Default
+
+        if svc_str not in ['any', 'application-default'] and re.match(r'^\d', svc_str):
             # It's a number, so we need an object
-            svc_name = f"service-{req.protocol}-{req.service_port}"
-            # Check FW/DB? We'll blindly try to create or assume logic in FwService
-            # We'll implement inline ensure here strictly
+            svc_name = f"service-{req.protocol}-{svc_str}"
             try:
-                p_svc = PanService(svc_name, protocol=req.protocol, destination_port=req.service_port)
+                p_svc = PanService(svc_name, protocol=req.protocol, destination_port=svc_str)
                 fw.add(p_svc)
                 p_svc.create() 
             except Exception:
-                pass # Already exists or checking error handling.. simplified for speed
+                pass 
 
         # Clean Name
         clean_name = re.sub(r'[^a-zA-Z0-9_\-]', '', req.rule_name.replace(' ', '_'))
         final_name = (clean_name if clean_name and clean_name[0].isalpha() else f"R_{clean_name}")[:63]
 
+        app_val = req.application or 'any'
+        if not app_val: app_val = 'any'
+
+        print(f"DEBUG FW CREATE: Rule={final_name}, Svc={svc_name}, App={app_val}")
+
         # FW Rule
         rb = Rulebase()
         fw.add(rb)
+        
+        # PREVENT MERGE CONFLICTS:
+        # Strategy: Create a temporary object with the same name, attach to device, and delete.
+        # This forces a delete API call for this object's XPATH without needing to 'find' it first.
+        try:
+            temp_rule_for_deletion = CustomSecurityRule(name=final_name)
+            rb.add(temp_rule_for_deletion)
+            temp_rule_for_deletion.delete()
+            # Remove from local tree so it doesn't conflict with the new one we are about to add
+            rb.remove(temp_rule_for_deletion)
+        except Exception as e:
+            # If it doesn't exist, this might throw an error (depending on SDK/FW version), or just work.
+            # We log but continue.
+            print(f"DEBUG FW DELETE INFO: {str(e)}")
+            # Ensure it's removed from local tree in case delete failed but add succeeded
+            if temp_rule_for_deletion in rb.children:
+                rb.remove(temp_rule_for_deletion)
+
+        # Now create the real new rule
         fw_rule = CustomSecurityRule(
             name=final_name,
             fromzone=[req.from_zone], tozone=[req.to_zone],
             source=[req.source_ip], destination=[req.destination_ip],
-            application=[req.application], service=[svc_name],
+            application=[app_val], service=[svc_name],
             action='allow',
             tag=[req.tag] if req.tag and req.tag != "None" else [],
             group_tag=req.group_tag

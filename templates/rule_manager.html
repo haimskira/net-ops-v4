@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="en" dir="ltr">
 
 <head>
     <meta charset="UTF-8">
@@ -166,12 +166,12 @@
         <div class="bg-indigo-600/20 p-8 border-b border-slate-700 flex justify-between items-center">
             <div>
                 <h1 class="text-3xl font-extrabold tracking-tight text-indigo-400">Rule Manager Pro</h1>
-                <p class="text-slate-400 mt-1">טופס בקשת חוק</p>
+                <p class="text-slate-400 mt-1">Rule Request Form</p>
             </div>
             <div id="loading-indicator"
                 class="flex items-center gap-3 bg-slate-900/80 px-5 py-2 rounded-full border border-indigo-500/30">
                 <div class="spinner w-4 h-4 border-2 border-indigo-400 rounded-full"></div>
-                <span class="text-sm font-medium text-slate-300">טוען תשתיות...</span>
+                <span class="text-sm font-medium text-slate-300">Loading infrastructure...</span>
             </div>
         </div>
 
@@ -183,19 +183,19 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="md:col-span-2 space-y-2">
-                    <label class="font-bold text-slate-400 block text-sm mr-1">שם החוקה</label>
-                    <input type="text" id="rule_name" placeholder="הזן שם לחוקה (חובה)">
+                    <label class="font-bold text-slate-400 block text-sm ml-1">Rule Name</label>
+                    <input type="text" id="rule_name" placeholder="Enter rule name (Required)">
                 </div>
 
                 <div class="space-y-2">
-                    <label class="font-bold text-slate-400 block text-sm mr-1 flex items-center">
-                        From Zone <span id="src-zone-status" class="hidden auto-detect-badge">זוהה אוטומטית</span>
+                    <label class="font-bold text-slate-400 block text-sm ml-1 flex items-center">
+                        From Zone <span id="src-zone-status" class="hidden auto-detect-badge">Auto-detected</span>
                     </label>
                     <select id="from_zone"></select>
                 </div>
                 <div class="space-y-2">
-                    <label class="font-bold text-slate-400 block text-sm mr-1 flex items-center">
-                        To Zone <span id="dst-zone-status" class="hidden auto-detect-badge">זוהה אוטומטית</span>
+                    <label class="font-bold text-slate-400 block text-sm ml-1 flex items-center">
+                        To Zone <span id="dst-zone-status" class="hidden auto-detect-badge">Auto-detected</span>
                     </label>
                     <select id="to_zone"></select>
                 </div>
@@ -203,51 +203,51 @@
                 <div class="space-y-4 bg-slate-900/30 p-4 rounded-2xl border border-slate-800">
                     <div class="space-y-2 relative">
                         <label class="font-bold text-indigo-400 block text-sm">Source IP/Object</label>
-                        <input id="source_ip" autocomplete="off" placeholder="הקלד IP או שם אובייקט..."
+                        <input id="source_ip" autocomplete="off" placeholder="Type IP or Object name..."
                             oninput="handleInputProcessing(this, 'src')">
                         <div id="src_results" class="live-results hidden"></div>
                     </div>
                     <select id="source_group" onchange="handleMutualExclusion('source_group', 'source_ip')">
-                        <option value="">-- בחר קבוצה מה-DB --</option>
+                        <option value="">-- Select Group from DB --</option>
                     </select>
                 </div>
 
                 <div class="space-y-4 bg-slate-900/30 p-4 rounded-2xl border border-slate-800">
                     <div class="space-y-2 relative">
                         <label class="font-bold text-indigo-400 block text-sm">Destination IP/Object</label>
-                        <input id="destination_ip" autocomplete="off" placeholder="הקלד IP או שם אובייקט..."
+                        <input id="destination_ip" autocomplete="off" placeholder="Type IP or Object name..."
                             oninput="handleInputProcessing(this, 'dst')">
                         <div id="dst_results" class="live-results hidden"></div>
                     </div>
                     <select id="destination_group"
                         onchange="handleMutualExclusion('destination_group', 'destination_ip')">
-                        <option value="">-- בחר קבוצה מה-DB --</option>
+                        <option value="">-- Select Group from DB --</option>
                     </select>
                 </div>
 
                 <div class="space-y-2 relative">
-                    <label class="font-bold text-indigo-400 block text-sm mr-1">Application</label>
+                    <label class="font-bold text-indigo-400 block text-sm ml-1">Application</label>
                     <input id="application" autocomplete="off" value="any"
                         oninput="handleLiveSearch(this, 'app', fwAppList)">
                     <div id="app_results" class="live-results hidden"></div>
                 </div>
 
                 <div class="space-y-2 relative">
-                    <label class="font-bold text-indigo-400 block text-sm mr-1">Service (Port)</label>
-                    <input id="service_port" autocomplete="off" placeholder="חפש פורט או שירות..."
+                    <label class="font-bold text-indigo-400 block text-sm ml-1">Service (Port)</label>
+                    <input id="service_port" autocomplete="off" placeholder="Search port or service..."
                         oninput="handleLiveSearch(this, 'service', fwServiceList)">
                     <div id="service_results" class="live-results hidden"></div>
                 </div>
 
                 <div class="space-y-2 relative">
-                    <label class="font-bold text-slate-400 block text-sm mr-1">Tag (Expiration)</label>
-                    <input id="tag" autocomplete="off" placeholder="חפש  TAG..."
+                    <label class="font-bold text-slate-400 block text-sm ml-1">Tag (Expiration)</label>
+                    <input id="tag" autocomplete="off" placeholder="Search TAG..."
                         oninput="handleLiveSearch(this, 'tag', fwTagList)">
                     <div id="tag_results" class="live-results hidden"></div>
                 </div>
 
                 <div class="space-y-2 relative">
-                    <label class="font-bold text-orange-400 block text-sm mr-1">Group Tag</label>
+                    <label class="font-bold text-orange-400 block text-sm ml-1">Group Tag</label>
                     <input id="group_tag" autocomplete="off" placeholder="G-... tag group"
                         oninput="handleLiveSearch(this, 'group_tag', fwGroupTagList)">
                     <div id="group_tag_results" class="live-results hidden"></div>
@@ -257,7 +257,7 @@
             <div class="mt-10">
                 <button id="submit-btn" onclick="submitAction('/create-rule')"
                     class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-2xl shadow-lg transition transform active:scale-[0.98]">
-                    שלח בקשת חוקה לאישור
+                    Submit Rule Request for Approval
                 </button>
             </div>
 
@@ -293,7 +293,7 @@
                     const populateSelect = (id, items, def) => {
                         const el = document.getElementById(id);
                         if (!el) return;
-                        el.innerHTML = id.includes('group') ? '<option value="">-- בחר קבוצה --</option>' : '';
+                        el.innerHTML = id.includes('group') ? '<option value="">-- Select Group --</option>' : '';
                         let finalItems = [...items];
                         if (id.includes('zone') && !finalItems.includes('any')) finalItems.unshift('any');
                         finalItems.forEach(i => {
@@ -429,14 +429,14 @@
                     container.classList.remove('hidden');
                     isShadowBlocked = true;
                     submitBtn.disabled = true;
-                    submitBtn.innerText = "חוק קיים במערכת - השליחה חסומה";
+                    submitBtn.innerText = "Rule exists in system - Submission blocked";
                     alertBox.className = "flex items-center gap-3 p-4 rounded-2xl border border-emerald-500/50 bg-emerald-500/10 text-emerald-400 shake";
-                    alertBox.innerHTML = `<span>✅ <strong>תעבורה מאושרת:</strong> קיימת כבר בחוקים: ${result.rules.join(', ')}</span>`;
+                    alertBox.innerHTML = `<span>✅ <strong>Traffic Allowed:</strong> Already exists in rules: ${result.rules.join(', ')}</span>`;
                 } else {
                     isShadowBlocked = false;
                     container.classList.add('hidden');
                     submitBtn.disabled = false;
-                    submitBtn.innerText = "שלח בקשת חוקה לאישור";
+                    submitBtn.innerText = "Submit Rule Request for Approval";
                 }
             } catch (e) { console.error("Shadow check error", e); }
         }
@@ -457,7 +457,7 @@
             const status = document.getElementById('status');
 
             if (!nameField.value.trim()) {
-                status.innerText = "⚠️ חובה להזין שם לחוקה לפני השליחה";
+                status.innerText = "⚠️ Rule name is required before submission";
                 status.className = "mt-8 p-4 rounded-2xl block border text-center font-bold bg-rose-500/10 text-rose-400 shake";
                 status.classList.remove('hidden');
                 nameField.focus();
@@ -478,7 +478,7 @@
                 group_tag: document.getElementById('group_tag').value
             };
 
-            status.innerText = "שולח בקשה...";
+            status.innerText = "Sending request...";
             status.className = "mt-8 p-4 rounded-2xl block border text-center font-bold bg-indigo-500/10 text-indigo-400";
             status.classList.remove('hidden');
 
@@ -490,7 +490,7 @@
                 status.innerText = r.message;
                 status.className = `mt-8 p-4 rounded-2xl block border text-center font-bold ${r.status === 'success' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`;
                 if (r.status === 'success') setTimeout(() => location.reload(), 2000);
-            } catch (e) { status.innerText = "שגיאת תקשורת עם השרת"; }
+            } catch (e) { status.innerText = "Communication error with server"; }
         }
 
         /**

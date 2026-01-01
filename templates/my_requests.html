@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="en" dir="ltr">
 
 <head>
     <meta charset="UTF-8">
@@ -90,13 +90,13 @@
             class="flex justify-between items-center mb-8 glass-card p-6 rounded-3xl border border-slate-700/50 shadow-2xl light-mode:border-slate-300">
             <div>
                 <h1 class="text-2xl font-bold text-indigo-400 flex items-center gap-2">
-                    <span>📜</span> תור הבקשות שלי (Rules)
+                    <span>📜</span> My Request Queue (Rules)
                 </h1>
-                <p class="text-slate-500 text-sm mt-1 italic">סטטוס אישורי חוקי פיירוול בזמן אמת</p>
+                <p class="text-slate-500 text-sm mt-1 italic">Real-time firewall rule approval status</p>
             </div>
             <button onclick="loadRequests()"
                 class="bg-slate-800 p-3 rounded-full hover:bg-slate-700 transition-all shadow-lg light-mode:bg-slate-200 light-mode:hover:bg-slate-300 text-white light-mode:text-slate-700"
-                title="רענן נתונים">
+                title="Refresh Data">
                 🔄
             </button>
         </div>
@@ -104,7 +104,7 @@
         <div id="requests-list" class="space-y-4">
             <div class="text-center py-20 opacity-50">
                 <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-indigo-500 mb-4"></div>
-                <p class="text-sm">מושך נתונים מהשרת...</p>
+                <p class="text-sm">Fetching server data...</p>
             </div>
         </div>
     </div>
@@ -123,10 +123,10 @@
                 if (!data || data.length === 0) {
                     container.innerHTML = `
                         <div class="text-center py-20 border-2 border-dashed border-slate-800 rounded-3xl light-mode:border-slate-300">
-                            <p class="text-slate-500 italic">לא נמצאו בקשות חוקה המשויכות אליך.</p>
+                            <p class="text-slate-500 italic">No rule requests associated with you found.</p>
                             <button onclick="window.parent.toggleComponent('palo-alto')" 
                                     class="mt-4 bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-400 px-6 py-2 rounded-xl font-bold transition-all border border-indigo-500/30">
-                                צור חוקה חדשה עכשיו ➔
+                                Create New Rule Now ➔
                             </button>
                         </div>`;
                     return;
@@ -135,11 +135,11 @@
                 container.innerHTML = data.map(r => {
                     const status = (r.status || 'Pending').toLowerCase();
                     const sClass = `status-${status}`;
-                    let sText = "ממתין לבדיקה";
+                    let sText = "Pending Review";
                     let icon = "⏳";
 
-                    if (status === 'approved') { sText = "בוצע בפיירוול"; icon = "✅"; }
-                    else if (status === 'rejected') { sText = "נדחה"; icon = "❌"; }
+                    if (status === 'approved') { sText = "Done in Firewall"; icon = "✅"; }
+                    else if (status === 'rejected') { sText = "Rejected"; icon = "❌"; }
 
                     return `
                         <div class="glass-card p-6 rounded-2xl transition-all hover:bg-slate-800/40 border border-slate-700/30 light-mode:hover:bg-white/50 light-mode:border-slate-300">
@@ -161,7 +161,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="text-left flex flex-col items-end">
+                                <div class="text-right flex flex-col items-end">
                                     <span class="status-pill ${sClass}">
                                         ${sText}
                                     </span>
@@ -173,7 +173,7 @@
                                 <div class="admin-note-box flex gap-3 items-start">
                                     <span class="text-xs">💬</span>
                                     <div>
-                                        <p class="text-[10px] text-indigo-400 font-bold uppercase">הערת מנהל</p>
+                                        <p class="text-[10px] text-indigo-400 font-bold uppercase">Admin Note</p>
                                         <p class="text-sm text-slate-300 italic leading-relaxed light-mode:text-slate-700">${r.admin_notes}</p>
                                     </div>
                                 </div>
@@ -184,7 +184,7 @@
             } catch (e) {
                 console.error("Error loading requests:", e);
                 document.getElementById('requests-list').innerHTML =
-                    '<div class="p-6 bg-rose-500/10 border border-rose-500/20 rounded-2xl text-rose-400 text-center font-bold">⚠️ תקלה בתקשורת עם שרת הניהול</div>';
+                    '<div class="p-6 bg-rose-500/10 border border-rose-500/20 rounded-2xl text-rose-400 text-center font-bold">⚠️ Communication Error with Management Server</div>';
             }
         }
 
