@@ -186,21 +186,11 @@ def get_all_policies() -> Response:
                     # Resolve members for tooltip content (value)
                     tech_vals = resolve_object_content(obj_to_add)
                     
-                    # DEBUG: Add count to verify if server sees members
-                    members_list = getattr(obj_to_add, 'members', [])
-                    count_members = len(members_list)
-                    
+                    # Return clean list of values (e.g. IPs)
                     if tech_vals:
                          val_str = "\n".join(tech_vals)
                     else:
-                         if getattr(obj_to_add, 'is_group', False):
-                             val_str = f"NO-RESOLVABLE-CONTENT\n(Found {count_members} raw members)"
-                         else:
-                             val_str = obj_to_add.name
-                    
-                    if getattr(obj_to_add, 'is_group', False):
-                       header = f"[GROUP: {obj_to_add.name} | ID: {obj_to_add.id}]\n"
-                       val_str = header + val_str
+                         val_str = obj_to_add.name
                     
                     output.append({
                         "name": obj_to_add.name,
