@@ -119,17 +119,19 @@ class SyncService:
             if isinstance(members, str): members = [members]
             
             if members:
-                 logging.info(f"Group '{g_name}' has {len(members)} members. Processing...")
+                 # logging.info(f"Group '{g_name}' has {len(members)} members. Processing...")
+                 pass
             
             for m in members:
                 mid = addr_map.get(m.lower())
                 if mid: 
                     links.append({'parent_id': pid, 'member_id': mid})
                 else:
-                    logging.warning(f"  -> Member '{m}' not found in addr_map for Group '{g_name}'")
+                    # logging.warning(f"  -> Member '{m}' not found in addr_map for Group '{g_name}'")
+                    pass
 
         if links: 
-            logging.info(f"Inserting {len(links)} group associations into DB.")
+            # logging.info(f"Inserting {len(links)} group associations into DB.")
             db_sql.session.execute(address_group_members.insert(), links)
         else:
             logging.warning("No associations created during link_address_groups!")

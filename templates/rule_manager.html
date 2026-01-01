@@ -87,10 +87,14 @@
             width: 100%;
             background: var(--color-slate-800);
             border: 1px solid var(--color-slate-700);
-            border-radius: 0 0 12px 12px;
+            border-radius: 12px 12px 0 0;
+            /* Rounded top */
             max-height: 220px;
             overflow-y: auto;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.7);
+            box-shadow: 0 -10px 25px -5px rgba(0, 0, 0, 0.7);
+            bottom: 100%;
+            /* Open Upwards */
+            margin-bottom: 5px;
         }
 
         .result-item {
@@ -275,6 +279,10 @@
         let isShadowBlocked = false;
         let shadowCheckTimeout;
 
+        // Promise to handle race condition between Iframe load and PostMessage
+        let resolveParamsLoaded;
+        const paramsLoadedPromise = new Promise(r => resolveParamsLoaded = r);
+
         /**
          * טעינת פרמטרים וביצוע אכלוס רשימות ראשוני
          */
@@ -286,8 +294,8 @@
                     fwObjectMap = data.address_map || {};
                     fwAppList = data.applications || ["any"];
                     fwServiceList = data.services || ["any", "application-default"];
-                    fwTagList = ["None", ...(data.tags || []).filter(t => !t.startsWith('G-'))];
-                    fwGroupTagList = (data.tags || []).filter(t => t.startsWith('G-'));
+                    fwTagList = ["None", ...(data.tags || []).filter(t => !t.startsWith('G'))];
+                    fwGroupTagList = (data.tags || []).filter(t => /^[gG0-9]/.test(t));
 
                     // אכלוס Dropdowns רגילים
                     const populateSelect = (id, items, def) => {
@@ -309,6 +317,7 @@
                     populateSelect('destination_group', data.address_groups);
 
                     document.getElementById('loading-indicator').classList.add('hidden');
+                    resolveParamsLoaded(); // Signal that dropdowns are ready
                 }
             } catch (e) { console.error("Fetch params failed", e); }
         }
@@ -496,8 +505,10 @@
         /**
          * מאזין להזרקת נתונים מה-Log Viewer
          */
-        window.addEventListener('message', function (event) {
+        window.addEventListener('message', async function (event) {
             if (event.data.type === 'FILL_RULE') {
+                await paramsLoadedPromise; // Wait for Dropdowns to populate
+
                 const log = event.data.data;
                 document.getElementById('rule_name').value = `RULE_${log.app.toUpperCase()}_${log.dst_port}`;
                 document.getElementById('source_ip').value = log.source;
@@ -505,8 +516,22 @@
                 document.getElementById('application').value = log.app || 'any';
                 document.getElementById('service_port').value = log.dst_port || 'any';
 
-                if (log.src_zone) document.getElementById('from_zone').value = log.src_zone;
-                if (log.dst_zone) document.getElementById('to_zone').value = log.dst_zone;
+                // Robust setting of Select values (Case Insensitive)
+                const setSelect = (id, val) => {
+                    const sel = document.getElementById(id);
+                    if (!sel || !val) return;
+                    // Try exact match
+                    if ([...sel.options].some(o => o.value === val)) {
+                        sel.value = val;
+                        return;
+                    }
+                    // Try case-insensitive keys
+                    const found = [...sel.options].find(o => o.value.toLowerCase() === val.toLowerCase());
+                    if (found) sel.value = found.value;
+                };
+
+                if (log.src_zone) setSelect('from_zone', log.src_zone);
+                if (log.dst_zone) setSelect('to_zone', log.dst_zone);
 
                 handleMutualExclusion('source_ip', 'source_group');
                 handleMutualExclusion('destination_ip', 'destination_group');
@@ -532,12 +557,14 @@
         });
 
         // סגירת תוצאות בחיצה בחוץ
-        document.addEventListener("click", (e) => {
-            if (!e.target.closest('.relative')) {
-                ['src', 'dst', 'app', 'service', 'tag', 'group_tag'].forEach(t => {
-                    const box = document.getElementById(`${t}_results`);
-                    if (box) box.classList.add('hidden');
-                });
+        // Close dropdowns on click outside
+        document.addEventListener('click', function (e) {
+            const inputs = document.querySelectorAll('input');
+            let clickedInput = false;
+            inputs.forEach(i => { if (i.contains(e.target)) clickedInput = true; });
+
+            if (!clickedInput && !e.target.closest('.live-results')) {
+                document.querySelectorAll('.live-results').forEach(el => el.classList.add('hidden'));
             }
         });
     </script>

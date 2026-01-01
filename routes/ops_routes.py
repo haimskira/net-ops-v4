@@ -278,17 +278,29 @@ def get_params() -> Response:
 @ops_bp.route('/commit', methods=['POST'])
 def commit_changes() -> Response:
     """Triggers a configuration commit on the firewall."""
+    logging.info("COMMIT: Received commit request.")
     if not session.get('is_admin'):
+        logging.warning("COMMIT: Unauthorized attempt.")
         return jsonify({"status": "error", "message": "Unauthorized"}), 403
 
     try:
+        logging.info("COMMIT: Connecting to Firewall...")
         fw = FwService.get_connection()
+        logging.info("COMMIT: Connection OK. Sending commit...")
         job_id = fw.commit(sync=False)
+        
+        if job_id is None:
+            logging.info("COMMIT: No changes to commit (Job ID is None).")
+            return jsonify({"status": "success", "message": "There is nothing to commit."})
+
+        logging.info(f"COMMIT: Success! Job ID: {job_id}")
         return jsonify({"status": "success", "message": f"Commit sent! (Job ID {job_id})."})
     except Exception as e:
-        if "705" in str(e) or "704" in str(e):
+        err_msg = str(e)
+        logging.error(f"COMMIT: Error - {err_msg}")
+        if "705" in err_msg or "704" in err_msg:
             return jsonify({"status": "success", "message": "Commit is already running in background."})
-        return jsonify({"status": "error", "message": str(e)}), 500
+        return jsonify({"status": "error", "message": f"Commit Failed: {err_msg}"}), 500
 
 @ops_bp.route('/job-status/<int:job_id>')
 def get_job_status(job_id: int) -> Response:
