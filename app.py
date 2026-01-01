@@ -28,6 +28,7 @@ from routes.main_routes import main_bp
 from routes.rule_routes import rules_bp
 from routes.object_routes import objects_bp
 from routes.ops_routes import ops_bp
+from routes.admin_routes import admin_bp
 
 # הגדרות לוגים
 logger = logging.getLogger(__name__)
@@ -84,6 +85,7 @@ app.register_blueprint(main_bp)
 app.register_blueprint(rules_bp)
 app.register_blueprint(objects_bp)
 app.register_blueprint(ops_bp)
+app.register_blueprint(admin_bp, url_prefix='/admin')
 
 # --------------------------------------------------------------------------
 # 3. מנגנון סנכרון אוטומטי (Background Sync) - מתוקן
