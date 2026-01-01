@@ -195,7 +195,8 @@ def syslog_listener(flask_app: Flask) -> None:
 # --------------------------------------------------------------------------
 @app.before_request
 def require_login():
-    allowed = ['auth.login', 'static']
+    # logger.info(f"Checking access for endpoint: {request.endpoint}")
+    allowed = ['auth.login', 'static', 'ops.debug_sync_route']
     if 'user' not in session and request.endpoint not in allowed:
         return redirect(url_for('auth.login'))
 

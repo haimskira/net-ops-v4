@@ -104,14 +104,35 @@ class SyncService:
 
     def link_address_groups(self, group_list, addr_map):
         links = []
+        logging.info(f"Linking {len(group_list)} Address Groups...")
         for g in group_list:
-            pid = addr_map.get(g.get('name', '').lower())
-            members = g.get('static') or []
+            g_name = g.get('name', '')
+            pid = addr_map.get(g_name.lower())
+            
+            # Support both 'static' (API) and 'static_value' (some SDK versions)
+            members = g.get('static') or g.get('static_value') or []
+            
+            if not pid:
+                logging.warning(f"Group '{g_name}' not found in addr_map (Keys: {list(addr_map.keys())[:5]}...)")
+                continue
+                
             if isinstance(members, str): members = [members]
+            
+            if members:
+                 logging.info(f"Group '{g_name}' has {len(members)} members. Processing...")
+            
             for m in members:
                 mid = addr_map.get(m.lower())
-                if pid and mid: links.append({'parent_id': pid, 'member_id': mid})
-        if links: db_sql.session.execute(address_group_members.insert(), links)
+                if mid: 
+                    links.append({'parent_id': pid, 'member_id': mid})
+                else:
+                    logging.warning(f"  -> Member '{m}' not found in addr_map for Group '{g_name}'")
+
+        if links: 
+            logging.info(f"Inserting {len(links)} group associations into DB.")
+            db_sql.session.execute(address_group_members.insert(), links)
+        else:
+            logging.warning("No associations created during link_address_groups!")
 
     def sync_service_objects(self, svc_list, group_list):
         name_to_id = {}

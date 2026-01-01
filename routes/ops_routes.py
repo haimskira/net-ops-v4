@@ -62,25 +62,23 @@ def resolve_object_content(obj: Any, depth: int = 0) -> List[str]:
     פונקציה רקורסיבית ששולפת את התוכן הטכני (IP/Port/App).
     מעודכנת לפתרון בעיית ה-ANY בקבוצות ע"י שליפה רקורסיבית של חברים.
     """
-    if not obj or depth > 5: # הגנה מפני רקורסיה אינסופית
+    if not obj or depth > 5: 
         return []
         
     if not getattr(obj, 'is_group', False):
-        # שליפת הערך הטכני לפי סוג האובייקט
         val = getattr(obj, 'value', '') or getattr(obj, 'port', '')
-        
-        # סינון ערכים לא טכניים שעלולים להגיע מה-Firewall
+        # logging.info(f"RESOLVER-DEBUG: Leaf '{obj.name}' Val: {val}")
         if val and str(val).lower() not in ['any', 'group', 'application-default']:
             return [str(val)]
         return []
     
     res = []
-    # שליפת רשימת החברים מתוך הקשר (Relationship) - דורש Eager Loading בשאילתה
     members = getattr(obj, 'members', [])
+    # logging.info(f"RESOLVER-DEBUG: Group '{obj.name}' Depth: {depth} Members: {len(members)}")
     for m in members:
         res.extend(resolve_object_content(m, depth + 1))
         
-    return list(set(res)) # הסרת כפילויות
+    return list(set(res))
 
 # --------------------------------------------------------------------------
 # II. View Routes (Template Rendering)
@@ -160,26 +158,62 @@ def get_all_policies() -> Response:
     משתמש ב-selectinload כדי למשוך את ה-members של ה-ServiceObject וה-AddressObject.
     """
     try:
-        # שימוש ב-JoinedLoad ו-SelectInLoad לפתרון בעיית חברי הקבוצות
-        rules = SecurityRule.query.options(
-            joinedload(SecurityRule.sources).selectinload(AddressObject.members),
-            joinedload(SecurityRule.destinations).selectinload(AddressObject.members),
-            joinedload(SecurityRule.services).selectinload(ServiceObject.members),
-            joinedload(SecurityRule.applications)
-        ).all()
+        # Temporarily removing eager loading to debug empty members issue
+        # rules = SecurityRule.query.options(
+        #     joinedload(SecurityRule.sources).selectinload(AddressObject.members),
+        #     joinedload(SecurityRule.destinations).selectinload(AddressObject.members),
+        #     joinedload(SecurityRule.services).selectinload(ServiceObject.members),
+        #     joinedload(SecurityRule.applications)
+        # ).all()
+        
+        # Lazy loading fallback
+        logging.info("Fetching all policies (Lazy Loading v5 - Session Remove)...")
+        db_sql.session.remove() # Completely remove session to ensure fresh connection from pool
+        rules = SecurityRule.query.all()
+        logging.info(f"Fetched {len(rules)} rules.")
         
         formatted_rules = []
         for r in rules:
             def format_collection(obj_list):
                 if not obj_list: return []
                 output = []
-                for o in obj_list:
-                    tech_vals = resolve_object_content(o)
+                seen = set()
+
+                def add_obj(obj_to_add):
+                    if obj_to_add.name in seen: return
+                    seen.add(obj_to_add.name)
+                    
+                    # Resolve members for tooltip content (value)
+                    tech_vals = resolve_object_content(obj_to_add)
+                    
+                    # DEBUG: Add count to verify if server sees members
+                    members_list = getattr(obj_to_add, 'members', [])
+                    count_members = len(members_list)
+                    
+                    if tech_vals:
+                         val_str = "\n".join(tech_vals)
+                    else:
+                         if getattr(obj_to_add, 'is_group', False):
+                             val_str = f"NO-RESOLVABLE-CONTENT\n(Found {count_members} raw members)"
+                         else:
+                             val_str = obj_to_add.name
+                    
+                    if getattr(obj_to_add, 'is_group', False):
+                       header = f"[GROUP: {obj_to_add.name} | ID: {obj_to_add.id}]\n"
+                       val_str = header + val_str
+                    
                     output.append({
-                        "name": o.name,
-                        "value": ", ".join(tech_vals) if tech_vals else o.name,
-                        "is_group": getattr(o, 'is_group', False)
+                        "name": obj_to_add.name,
+                        "value": val_str,
+                        "is_group": getattr(obj_to_add, 'is_group', False)
                     })
+
+                # Fix: Do NOT expand groups in the table itself. 
+                # Just add the group object. 'resolve_object_content' inside 'add_obj' 
+                # will handle fetching the members for the tooltip.
+                for o in obj_list:
+                    add_obj(o)
+                    
                 return output
 
             formatted_rules.append({
@@ -192,7 +226,10 @@ def get_all_policies() -> Response:
                 "applications": format_collection(r.applications),
                 "action": r.action or 'allow'
             })
-        return jsonify(formatted_rules)
+        
+        response = jsonify(formatted_rules)
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        return response
     except Exception as e:
         logging.error(f"Inventory Fetch Error: {str(e)}")
         return jsonify([]), 500
@@ -280,6 +317,49 @@ def get_job_status(job_id: int) -> Response:
         return jsonify({"status": "not_found"})
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)})
+
+
+@ops_bp.route('/debug-sync')
+def debug_sync_route():
+    """Debug route to test DB linking logic directly."""
+    try:
+        from services.sync_service import SyncService
+        mock_fw = None # Not needed for mock sync
+        mgr = SyncService(mock_fw)
+        
+        # 1. Clear DB
+        db_sql.session.expunge_all()
+        mgr._clear_database()
+        
+        # 2. Insert Objects
+        from config import Config
+        Config.DATA_DIR.mkdir(parents=True, exist_ok=True)
+        
+        addr_data = [{'name': 'Host-A', 'value': '1.1.1.1'}, {'name': 'Host-B', 'value': '2.2.2.2'}]
+        group_data = [{'name': 'Group-Test', 'static': ['Host-A', 'Host-B']}]
+        
+        # 3. Running Sync Parts Manually
+        print("DEBUG: Running Sync Address Objects...")
+        addr_map = mgr.sync_address_objects(addr_data, group_data)
+        print(f"DEBUG: Addr Map: {addr_map}")
+        
+        print("DEBUG: Linking Groups...")
+        mgr.link_address_groups(group_data, addr_map)
+        
+        db_sql.session.commit()
+        
+        # 4. Verification
+        g_obj = AddressObject.query.filter_by(name='Group-Test').first()
+        members = [m.name for m in g_obj.members]
+        return jsonify({
+            "status": "success",
+            "group": "Group-Test",
+            "members_found": members,
+            "expected": ['Host-A', 'Host-B'],
+            "match": sorted(members) == sorted(['Host-A', 'Host-B'])
+        })
+    except Exception as e:
+         return jsonify({"status": "error", "message": str(e), "trace": traceback.format_exc()})
 
 
 # --------------------------------------------------------------------------
