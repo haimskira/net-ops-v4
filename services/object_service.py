@@ -28,6 +28,16 @@ class ObjectService(BaseService):
                 request_time=datetime.now()
             )
             db_sql.session.add(req)
+            
+            # Log Activity
+            db_sql.session.add(AuditLog(
+                user=user,
+                action="REQUEST_OBJECT",
+                resource_type=data.type,
+                resource_name=data.name,
+                details=f"Value: {data.value}"
+            ))
+            
         return req
 
     @classmethod

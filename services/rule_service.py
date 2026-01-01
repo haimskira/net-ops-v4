@@ -37,6 +37,16 @@ class RuleService(BaseService):
                 request_time=datetime.now()
             )
             db_sql.session.add(req)
+
+            # Log Activity
+            db_sql.session.add(AuditLog(
+                user=user,
+                action="REQUEST_RULE",
+                resource_type="rule",
+                resource_name=data.rule_name,
+                details=f"Src: {data.source_ip} Dst: {data.destination_ip} Svc: {data.service_port}"
+            ))
+
         return req
 
     @classmethod

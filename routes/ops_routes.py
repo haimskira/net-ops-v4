@@ -41,7 +41,9 @@ from managers.models import (
     ApplicationObject,
     TrafficLog, 
     db_sql,
-    rule_app_map
+    rule_app_map,
+    RuleRequest,
+    ObjectRequest
 )
 # Sync service imported above
 
@@ -493,12 +495,71 @@ def dashboard_security():
         is_admin = session.get('is_admin')
 
         # 1. Recent Actions Ticker
-        # Admin sees everything, User sees only their own
+        # We aggregate AuditLogs + RuleRequests + ObjectRequests to ensure the list is populated
+        
+        # A. Audit Logs
         audit_query = AuditLog.query
         if not is_admin:
             audit_query = audit_query.filter_by(user=user)
-            
-        recent_logs = audit_query.order_by(AuditLog.timestamp.desc()).limit(5).all()
+        audits = audit_query.order_by(AuditLog.timestamp.desc()).limit(10).all()
+
+        activity_list = []
+        for a in audits:
+            activity_list.append({
+                "user": a.user,
+                "action": a.action,
+                "time_obj": a.timestamp,
+                "time": a.timestamp.strftime('%Y-%m-%d %H:%M'),
+                "details": (a.details[:50] + '...') if a.details else ''
+            })
+
+        # B. Rule Requests (Historical Fallback)
+        rule_query = RuleRequest.query
+        if not is_admin:
+            rule_query = rule_query.filter_by(requested_by=user)
+        rules = rule_query.order_by(RuleRequest.request_time.desc()).limit(5).all()
+        
+        for r in rules:
+            activity_list.append({
+                "user": r.requested_by,
+                "action": "REQUEST_RULE (Legacy)",
+                "time_obj": r.request_time,
+                "time": r.request_time.strftime('%Y-%m-%d %H:%M'),
+                "details": f"Rule: {r.rule_name} ({r.status})"
+            })
+
+        # C. Object Requests (Historical Fallback)
+        obj_query = ObjectRequest.query
+        if not is_admin:
+            obj_query = obj_query.filter_by(requested_by=user)
+        objs = obj_query.order_by(ObjectRequest.request_time.desc()).limit(5).all()
+
+        for o in objs:
+             activity_list.append({
+                "user": o.requested_by,
+                "action": "REQUEST_OBJECT (Legacy)",
+                "time_obj": o.request_time,
+                "time": o.request_time.strftime('%Y-%m-%d %H:%M'),
+                "details": f"Obj: {o.name} ({o.status})"
+            })
+
+        # D. Sort and deduplicate (roughly, though IDs differ) - we just sort by time
+        activity_list.sort(key=lambda x: x['time_obj'], reverse=True)
+        recent_logs = activity_list[:10]
+         
+        # Ensure 'recent_logs' is compatible with frontend loop which expects dictionary properties
+        # The frontend uses dot notation? dashboard.html: l.action. 
+        # Wait, Python dictionaries are NOT objects in Jinja unless passed as such, 
+        # BUT this is returning JSON to frontend JS. JS parses JSON to objects.
+        # Frontend JS (dashboard.html): data.recent_actions.map(l => l.action ...)
+        # So returning a list of dicts is PERFECT.
+        
+        # We need to remove 'time_obj' before sending JSON
+        final_recent = []
+        for item in recent_logs:
+             item.pop('time_obj', None)
+             final_recent.append(item)
+
         
         # 2. Top Admins (Activity Count)
         # Only visible to Admins
@@ -509,12 +570,7 @@ def dashboard_security():
             ).group_by(AuditLog.user).order_by(func.count(AuditLog.id).desc()).limit(3).all()
         
         return jsonify({
-            "recent_actions": [{
-                "user": l.user, 
-                "action": l.action, 
-                "time": l.timestamp.strftime('%H:%M isostime'),
-                "details": (l.details[:50] + '...') if l.details else ''
-            } for l in recent_logs],
+            "recent_actions": final_recent,
             "top_admins": [{"user": r[0], "count": r[1]} for r in top_admins]
         })
     except Exception as e:
