@@ -1,233 +1,588 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
     <title>NET-OPS Admin Portal</title>
-    
+
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+
     <style>
         @font-face {
             font-family: 'Assistant';
             src: url("{{ url_for('static', filename='fonts/Assistant-Regular.ttf') }}") format('truetype');
-            font-weight: 400;
+            font-weight: 300;
             font-style: normal;
         }
-        body { font-family: 'Assistant', sans-serif !important; background-color: #0f172a; margin: 0; }
-        
-        .fade-in { animation: fadeIn 0.3s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .btn-active { background-color: #4f46e5 !important; color: white !important; box-shadow: 0 0 15px rgba(79, 70, 229, 0.4); }
-        .btn-active div { background-color: #6366f1 !important; }
-        
-        .network-pulse { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); } 70% { box-shadow: 0 0 0 20px rgba(99, 102, 241, 0); } 100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); } }
-        
-        iframe { width: 100%; height: 100%; border: none; border-radius: 1.5rem; background-color: #0f172a; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
-        
-        /* Utility for sidebar button sizing */
-        .nav-btn { width: 100%; text-align: right; border: none; cursor: pointer; color: #94a3b8; }
-        .nav-btn:hover { color: white; }
+
+        @font-face {
+            font-family: 'Assistant';
+            src: url("{{ url_for('static', filename='fonts/Assistant-Bold.ttf') }}") format('truetype');
+            font-weight: 700;
+            font-style: normal;
+        }
+
+        body {
+            font-family: 'Assistant', sans-serif !important;
+            margin: 0;
+            transition: background-color 0.5s cubic-bezier(0.4, 0, 0.2, 1), color 0.5s;
+            background-color: var(--color-slate-950);
+            height: 100vh;
+            /* Force full viewport height */
+            overflow: hidden;
+            /* Prevent body scroll */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Active state for dropdown items */
+        .btn-active {
+            background: rgba(99, 102, 241, 0.15) !important;
+            color: #818cf8 !important;
+            border-right: 3px solid #6366f1;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background-color: var(--color-slate-900);
+        }
+
+        /* Dropdown Item Styling - Glass Style */
+        .dropdown-item {
+            width: 100%;
+            text-align: right;
+            padding: 0.8rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border-radius: 0.75rem;
+            color: var(--color-slate-400);
+            transition: all 0.2s ease-out;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border: 1px solid transparent;
+        }
+
+        .dropdown-item:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--color-slate-200);
+            border-color: rgba(255, 255, 255, 0.05);
+            transform: translateX(-4px);
+        }
+
+        /* Ambient Background Blobs via CSS */
+        .ambient-blob {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.4;
+            z-index: 0;
+            animation: float 10s ease-in-out infinite;
+        }
+
+        .blob-1 {
+            top: -20%;
+            right: -10%;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.4) 0%, rgba(0, 0, 0, 0) 70%);
+            animation-delay: 0s;
+        }
+
+        .blob-2 {
+            bottom: -20%;
+            left: -10%;
+            background: radial-gradient(circle, rgba(168, 85, 247, 0.3) 0%, rgba(0, 0, 0, 0) 70%);
+            animation-delay: 5s;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            50% {
+                transform: translate(20px, 20px) scale(1.1);
+            }
+
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
+        }
+
+        /* Glass Navbar Override */
+        .glass-nav {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .light-mode .glass-nav {
+            background: rgba(255, 255, 255, 0.7);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        /* Control Pill */
+        .control-pill {
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .light-mode .control-pill {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Custom Scrollbar */
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .custom-scroll::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 3px;
+        }
+
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
 
-    <nav class="bg-slate-900 border-b border-slate-800 p-4 shadow-2xl z-20">
-        <div class="container mx-auto flex flex-row-reverse justify-between items-center">
-            <div class="flex items-center gap-6">
-                <span class="text-2xl font-black text-indigo-500 italic tracking-tighter">NET-OPS</span>
-                
+<body class="bg-slate-950 text-slate-100">
+
+    <!-- Ambient Background -->
+    <div class="fixed inset-0 pointer-events-none overflow-hidden">
+        <div class="ambient-blob blob-1"></div>
+        <div class="ambient-blob blob-2"></div>
+    </div>
+
+    <!-- Frosted Glass Navbar -->
+    <nav class="glass-nav z-50 flex-none h-20 shadow-xl relative">
+        <div class="w-full h-full px-8 flex justify-between items-center relative z-10">
+
+            <!-- Right Section: Branding & Tools -->
+            <div class="flex items-center gap-12">
+                <!-- Branding -->
+                <!-- Branding -->
+                <div class="flex items-center gap-3 select-none group cursor-pointer" onclick="closeAll()">
+                    <div class="relative">
+                        <div
+                            class="relative w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/30 group-hover:bg-indigo-500 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-white" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="flex flex-col leading-none">
+                        <span
+                            class="text-xl font-black tracking-tight text-slate-100 group-hover:text-white transition-colors">NET<span
+                                class="text-indigo-400 italic">OPS</span></span>
+                        <span class="text-[9px] font-bold uppercase tracking-[0.2em] text-slate-400">Security
+                            Portal</span>
+                    </div>
+                </div>
+
+                <!-- Tools Dropdown Trigger -->
+                <div class="relative" id="fw-mgmt-container">
+                    <button onclick="toggleDropdown('fw-menu')"
+                        class="group flex items-center gap-3 px-5 py-2.5 rounded-full transition-all duration-300 border border-transparent hover:bg-slate-800/30 hover:border-white/5 active:scale-95">
+                        <span class="text-xl filter drop-shadow-[0_0_8px_rgba(99,102,241,0.5)]">🛠️</span>
+                        <span
+                            class="font-bold text-slate-300 group-hover:text-white transition-colors text-sm tracking-wide" >כלי ניהול</span>
+                        <span
+                            class="text-[10px] text-slate-500 transition-transform duration-300 group-hover:rotate-180"
+                            id="fw-arrow">▼</span>
+                    </button>
+
+                    <!-- Glass Dropdown Menu -->
+                    <div id="fw-menu"
+                        class="dropdown-menu absolute top-full right-0 mt-4 w-[480px] hidden flex flex-col gap-1 p-3 bg-slate-900/90 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] origin-top-right transition-all max-h-[450px] overflow-y-auto custom-scroll">
+
+                        <div
+                            class="px-3 py-1.5 text-[10px] font-extrabold text-indigo-400/80 uppercase tracking-widest flex items-center gap-2">
+                            <span class="w-1 h-1 rounded-full bg-indigo-500"></span> פעולות ליבה
+                        </div>
+
+                        <button id="btn-palo-alto" onclick="toggleComponent('palo-alto')" class="dropdown-item py-1.5">
+                            <span class="text-lg opacity-80">🛡️</span>
+                            <div class="flex items-baseline gap-2">
+                                <span class="text-slate-200 text-sm font-semibold whitespace-nowrap">Rule Manager</span>
+                                <span class="text-[10px] text-slate-500/80 font-normal">ניהול חוקה</span>
+                            </div>
+                        </button>
+
+                        <button id="btn-object-creator" onclick="toggleComponent('object-creator')"
+                            class="dropdown-item py-1.5">
+                            <span class="text-lg opacity-80">📦</span>
+                            <div class="flex items-baseline gap-2">
+                                <span class="text-slate-200 text-sm font-semibold whitespace-nowrap">Object
+                                    Creator</span>
+                                <span class="text-[10px] text-slate-500/80 font-normal">בקשת אובייקט</span>
+                            </div>
+                        </button>
+
+                        <button id="btn-policy-match" onclick="toggleComponent('policy-match')"
+                            class="dropdown-item py-1.5">
+                            <span class="text-lg opacity-80">🔍</span>
+                            <div class="flex items-baseline gap-2">
+                                <span class="text-slate-200 text-sm font-semibold whitespace-nowrap">Policy Match</span>
+                                <span class="text-[10px] text-slate-500/80 font-normal">סימולציה</span>
+                            </div>
+                        </button>
+
+                        <div class="h-px bg-white/5 my-1 mx-3"></div>
+                        <div
+                            class="px-3 py-1.5 text-[10px] font-extrabold text-emerald-400/80 uppercase tracking-widest flex items-center gap-2">
+                            <span class="w-1 h-1 rounded-full bg-emerald-500"></span> תצפית
+                        </div>
+
+                        <button id="btn-log-viewer" onclick="toggleComponent('log-viewer')"
+                            class="dropdown-item py-1.5">
+                            <span class="text-lg opacity-80">📊</span>
+                            <div class="flex items-baseline gap-2">
+                                <span class="text-slate-200 text-sm font-semibold whitespace-nowrap">Traffic Logs</span>
+                            </div>
+                        </button>
+
+                        <button id="btn-audit-logs" onclick="toggleComponent('audit-logs')"
+                            class="dropdown-item py-1.5">
+                            <span class="text-lg opacity-80">👣</span>
+                            <div class="flex items-baseline gap-2">
+                                <span class="text-slate-200 text-sm font-semibold whitespace-nowrap">Audit Logs</span>
+                                <span class="text-[10px] text-slate-500/80 font-normal">תיעוד</span>
+                            </div>
+                        </button>
+
+                        <button id="btn-policy-inventory" onclick="toggleComponent('policy-inventory')"
+                            class="dropdown-item py-1.5">
+                            <span class="text-lg opacity-80">📋</span>
+                            <div class="flex items-baseline gap-2">
+                                <span class="text-slate-200 text-sm font-semibold whitespace-nowrap">Inventory</span>
+                                <span class="text-[10px] text-slate-500/80 font-normal">רשימת חוקים</span>
+                            </div>
+                        </button>
+
+                        <div class="h-px bg-white/5 my-1 mx-3"></div>
+                        <div
+                            class="px-3 py-1.5 text-[10px] font-extrabold text-blue-400/80 uppercase tracking-widest flex items-center gap-2">
+                            <span class="w-1 h-1 rounded-full bg-blue-500"></span> בקשות
+                        </div>
+
+                        <button id="btn-my-requests" onclick="toggleComponent('my-requests')"
+                            class="dropdown-item py-1.5">
+                            <span class="text-lg opacity-80">📝</span>
+                            <div class="flex items-baseline gap-2">
+                                <span class="text-slate-200 text-sm font-semibold whitespace-nowrap">My Requests</span>
+                                <span class="text-[10px] text-slate-500/80 font-normal">סטטוס חוקות</span>
+                            </div>
+                        </button>
+
+                        <button id="btn-my-objects" onclick="toggleComponent('my-objects')"
+                            class="dropdown-item py-1.5">
+                            <span class="text-lg opacity-80">📦</span>
+                            <div class="flex items-baseline gap-2">
+                                <span class="text-slate-200 text-sm font-semibold whitespace-nowrap">My Objects</span>
+                                <span class="text-[10px] text-slate-500/80 font-normal">סטטוס אובייקטים</span>
+                            </div>
+                        </button>
+
+                        {% if session.get('is_admin') %}
+                        <div class="h-px bg-white/5 my-1 mx-3"></div>
+                        <div
+                            class="px-3 py-1.5 text-[10px] font-extrabold text-rose-400/80 uppercase tracking-widest flex items-center gap-2">
+                            <span class="w-1 h-1 rounded-full bg-rose-500"></span> ניהול
+                        </div>
+                        <button id="btn-admin-approval" onclick="toggleComponent('admin-approval')"
+                            class="dropdown-item justify-between py-1.5">
+                            <div class="flex items-center gap-2"><span class="text-lg opacity-80">🛡️</span> <span
+                                    class="text-slate-200 text-sm font-semibold whitespace-nowrap">Rule Approval</span>
+                                <span class="text-[10px] text-slate-500/80 font-normal">אישור חוקות</span>
+                            </div>
+                            <span id="menu-rule-badge"
+                                class="bg-indigo-500 shadow-lg shadow-indigo-500/40 text-white text-[10px] font-bold px-2 py-0.5 rounded-full hidden">0</span>
+                        </button>
+                        <button id="btn-object-approval" onclick="toggleComponent('object-approval')"
+                            class="dropdown-item justify-between py-1.5">
+                            <div class="flex items-center gap-2"><span class="text-lg opacity-80">📦</span> <span
+                                    class="text-slate-200 text-sm font-semibold whitespace-nowrap">Object
+                                    Approval</span> <span class="text-[10px] text-slate-500/80 font-normal">אישור
+                                    אובייקטים</span>
+                            </div>
+                            <span id="menu-obj-badge"
+                                class="bg-purple-500 shadow-lg shadow-purple-500/40 text-white text-[10px] font-bold px-2 py-0.5 rounded-full hidden">0</span>
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Admin Floating Badges (Quick Access) -->
                 {% if session.get('is_admin') %}
-                <div class="flex items-center gap-3">
-                    <div class="relative cursor-pointer flex items-center bg-slate-800 px-3 py-1 rounded-full border border-indigo-500/30 hover:border-indigo-500 transition-all" onclick="toggleComponent('admin-approval')" title="חוקות ממתינות">
-                        <span class="text-sm">🛡️</span>
-                        <span id="nav-rule-badge" class="mr-2 text-xs font-bold text-indigo-400">0</span>
-                    </div>
-                    <div class="relative cursor-pointer flex items-center bg-slate-800 px-3 py-1 rounded-full border border-purple-500/30 hover:border-purple-500 transition-all" onclick="toggleComponent('object-approval')" title="אובייקטים ממתינים">
-                        <span class="text-sm">📦</span>
-                        <span id="nav-obj-badge" class="mr-2 text-xs font-bold text-purple-400">0</span>
-                    </div>
+                <div class="flex items-center gap-3 mr-2">
+                    <button onclick="toggleComponent('admin-approval')"
+                        class="relative w-10 h-10 rounded-full bg-slate-800/40 border border-white/5 hover:bg-indigo-500/20 hover:border-indigo-500/50 transition-all flex items-center justify-center group"
+                        title="חוקות ממתינות">
+                        <span class="text-sm opacity-60 group-hover:opacity-100 transition-opacity">🛡️</span>
+                        <span id="nav-rule-badge"
+                            class="absolute -top-1 -right-1 w-4 h-4 bg-indigo-500 text-white text-[9px] font-bold flex items-center justify-center rounded-full shadow-lg border border-slate-900 hidden">0</span>
+                    </button>
+                    <button onclick="toggleComponent('object-approval')"
+                        class="relative w-10 h-10 rounded-full bg-slate-800/40 border border-white/5 hover:bg-purple-500/20 hover:border-purple-500/50 transition-all flex items-center justify-center group"
+                        title="אובייקטים ממתינים">
+                        <span class="text-sm opacity-60 group-hover:opacity-100 transition-opacity">📦</span>
+                        <span id="nav-obj-badge"
+                            class="absolute -top-1 -right-1 w-4 h-4 bg-purple-500 text-white text-[9px] font-bold flex items-center justify-center rounded-full shadow-lg border border-slate-900 hidden">0</span>
+                    </button>
                 </div>
                 {% endif %}
             </div>
 
-            <div class="flex items-center gap-6">
-                <button onclick="closeAll()" class="text-slate-400 hover:text-white transition-colors text-sm font-bold">דף הבית</button>
-                <a href="/logout" class="text-rose-400 hover:text-rose-300 transition-colors text-sm font-bold flex items-center gap-1"><span>🚪</span> יציאה</a>
+            <!-- Left Section: Unified Control Pill -->
+            <div
+                class="control-pill rounded-full p-1.5 px-6 flex items-center gap-6 select-none transition-all hover:border-white/20 whitespace-nowrap">
+
+                <!-- User Info -->
+                <div class="flex items-center gap-3 text-right">
+                    <div class="flex flex-col">
+                        <span class="text-xs font-bold text-slate-200 truncate max-w-[150px]">{{ session.get('user')
+                            }}</span>
+                        <span class="text-[9px] text-slate-500 font-bold uppercase tracking-wider">Online</span>
+                    </div>
+                </div>
+
+                <div class="h-6 w-px bg-white/10"></div>
+
+                <!-- Actions -->
+                <div class="flex items-center gap-1">
+                    <button id="theme-toggle-btn" onclick="ThemeManager.toggle()"
+                        class="w-8 h-8 rounded-full hover:bg-white/10 transition-all flex items-center justify-center text-amber-400 hover:scale-110 active:scale-95"
+                        title="Theme">
+                        ☀
+                    </button>
+                    <a href="/logout"
+                        class="w-8 h-8 rounded-full hover:bg-rose-500/20 hover:text-rose-400 transition-all flex items-center justify-center text-slate-400 hover:scale-110 active:scale-95"
+                        title="Logout">
+                        ⏻
+                    </a>
+                </div>
             </div>
+
         </div>
     </nav>
 
-    <div class="flex flex-1 overflow-hidden flex-row-reverse">
-        
-        <aside class="w-64 bg-slate-900 border-r border-slate-800 p-6 flex flex-col gap-4 shadow-2xl z-10 text-right">
-            <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">כלי ניהול</p>
-            
-            <button id="btn-palo-alto" onclick="toggleComponent('palo-alto')" class="nav-btn flex items-center gap-3 p-4 bg-slate-800 hover:bg-slate-700 rounded-xl transition-all group">
-                <div class="p-2 bg-slate-900 rounded-lg group-hover:bg-indigo-500 transition-colors">🛡️</div>
-                <span class="font-bold">Rule Manager</span>
-            </button>
+    <!-- Main Content Area: Minimized padding, Flex Fill -->
+    <div class="flex-1 flex flex-col p-2 z-10 overflow-hidden relative">
 
-            <button id="btn-object-creator" onclick="toggleComponent('object-creator')" class="nav-btn flex items-center gap-3 p-4 bg-slate-800 hover:bg-slate-700 rounded-xl transition-all group">
-                <div class="p-2 bg-slate-900 rounded-lg group-hover:bg-purple-500 transition-colors">📦</div>
-                <span class="font-bold">Object Creator</span>
-            </button>
+        <!-- Main: Flex-1, w-full, h-full, relative to anchor absolutes -->
+        <main
+            class="flex-1 rounded-xl border border-white/5 shadow-2xl overflow-hidden relative backdrop-blur-sm bg-slate-900/40 w-full h-full">
 
-            <button id="btn-policy-match" onclick="toggleComponent('policy-match')" class="nav-btn flex items-center gap-3 p-4 bg-slate-800 hover:bg-slate-700 rounded-xl transition-all group">
-                <div class="p-2 bg-slate-900 rounded-lg group-hover:bg-orange-500 transition-colors">🔍</div>
-                <span class="font-bold">Policy Match</span>
-            </button>
-
-            <button id="btn-policy-inventory" onclick="toggleComponent('policy-inventory')" class="nav-btn flex items-center gap-3 p-4 bg-slate-800 hover:bg-slate-700 rounded-xl transition-all group">
-                <div class="p-2 bg-slate-900 rounded-lg group-hover:bg-blue-500 transition-colors">📋</div>
-                <span class="font-bold">Policy Inventory</span>
-            </button>
-
-            <button id="btn-log-viewer" onclick="toggleComponent('log-viewer')" class="nav-btn flex items-center gap-3 p-4 bg-slate-800 hover:bg-slate-700 rounded-xl transition-all group">
-                <div class="p-2 bg-slate-900 rounded-lg group-hover:bg-emerald-500 transition-colors">📊</div>
-                <span class="font-bold">Traffic Logs</span>
-            </button>
-
-            <button id="btn-grafana" onclick="toggleComponent('grafana')" class="nav-btn flex items-center gap-3 p-4 bg-slate-800 hover:bg-slate-700 rounded-xl transition-all group">
-                <div class="p-2 bg-slate-900 rounded-lg group-hover:bg-orange-500 transition-colors">📈</div>
-                <span class="font-bold">Monitoring</span>
-            </button>
-
-            {% if not session.get('is_admin') %}
-            <div class="flex flex-col gap-2 mt-2 pt-2 border-t border-slate-800">
-                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-tighter mb-1 italic">הבקשות שלי</p>
-                <button id="btn-my-requests" onclick="toggleComponent('my-requests')" class="nav-btn flex items-center gap-3 p-4 bg-slate-800 hover:bg-slate-700 rounded-xl transition-all group">
-                    <div class="p-2 bg-slate-900 rounded-lg group-hover:bg-blue-500 transition-colors">📝</div>
-                    <span class="font-bold text-xs">סטטוס חוקות</span>
-                </button>
-                <button id="btn-my-objects" onclick="toggleComponent('my-objects')" class="nav-btn flex items-center gap-3 p-4 bg-slate-800 hover:bg-slate-700 rounded-xl transition-all group">
-                    <div class="p-2 bg-slate-900 rounded-lg group-hover:bg-purple-500 transition-colors">📦</div>
-                    <span class="font-bold text-xs">סטטוס אובייקטים</span>
-                </button>
-            </div>
-            {% endif %}
-
-            {% if session.get('is_admin') %}
-            <div class="mt-4 pt-4 border-t border-slate-800 flex flex-col gap-2 text-right">
-                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-tighter mb-1 italic">ניהול אדמין</p>
-                <button id="btn-admin-approval" onclick="toggleComponent('admin-approval')" class="nav-btn flex items-center gap-3 p-3 bg-indigo-900/20 hover:bg-indigo-800/40 rounded-xl transition-all group border border-indigo-500/20">
-                    <div class="p-2 bg-indigo-600 rounded-lg">🛡️</div>
-                    <span class="font-bold text-xs">אישור חוקות</span>
-                </button>
-                <button id="btn-object-approval" onclick="toggleComponent('object-approval')" class="nav-btn flex items-center gap-3 p-3 bg-purple-900/20 hover:bg-purple-800/40 rounded-xl transition-all group border border-purple-500/20">
-                    <div class="p-2 bg-purple-600 rounded-lg">📦</div>
-                    <span class="font-bold text-xs">אישור אובייקטים</span>
-                </button>
-                <button id="btn-audit-logs" onclick="toggleComponent('audit-logs')" class="nav-btn flex items-center gap-3 p-3 bg-slate-800 hover:bg-slate-700 rounded-xl transition-all group border border-slate-700/50">
-                    <div class="p-2 bg-slate-600 rounded-lg group-hover:bg-indigo-500 transition-colors">📜</div>
-                    <span class="font-bold text-xs">Audit Logs</span>
-                </button>
-            </div>
-            {% endif %}
-        </aside>
-
-        <main class="flex-1 flex flex-col p-8 overflow-hidden bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-black">
-            
-            <div id="welcome-view" class="fade-in flex flex-col items-center justify-center h-full text-center">
-                <div class="mb-8 p-8 bg-slate-900/50 rounded-full border border-indigo-500/30 network-pulse">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
-                    </svg>
+            <!-- Welcome View - Modern Typography - Absolute Center -->
+            <div id="welcome-view"
+                class="fade-in absolute inset-0 flex flex-col items-center justify-center text-center p-6">
+                <!-- Glowing Decoration -->
+                <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-30">
+                    <div class="w-[500px] h-[500px] bg-indigo-600/20 rounded-full blur-[120px]"></div>
                 </div>
-                <h2 class="text-3xl font-extrabold mb-4 bg-gradient-to-r from-white to-slate-500 bg-clip-text text-transparent italic">- Network Operations Center - </h2>
-                <p class="text-slate-400 italic">ברוך הבא, {{ session.get('user') }}. בחר כלי עבודה מהתפריט.</p>
+
+                <div class="relative z-10">
+                    <h1 class="text-6xl md:text-8xl font-black mb-2 tracking-tighter text-slate-100">NET<span
+                            class="italic text-indigo-500">OPS</span></h1>
+                    <div
+                        class="h-1 w-24 bg-indigo-500 mx-auto rounded-full mb-8 shadow-[0_0_20px_rgba(99,102,241,0.5)]">
+                    </div>
+                    <p class="text-2xl text-slate-300 font-light tracking-wide mb-2">Centralized Security Management</p>
+                    <p class="text-sm text-slate-500 uppercase tracking-[0.3em] font-bold">Version 2.0 • Offline Edition
+                    </p>
+                </div>
             </div>
 
-            <div id="palo-alto-view" class="hidden h-full"><iframe id="rule-manager-iframe" src="/palo-manager"></iframe></div>
-            <div id="object-creator-view" class="hidden h-full"><iframe id="object-creator-iframe" src="/object-creator"></iframe></div>
-            <div id="policy-match-view" class="hidden h-full"><iframe src="/policy-match-tool"></iframe></div>
-            <div id="policy-inventory-view" class="hidden h-full"><iframe id="policy-inventory-iframe" src="about:blank"></iframe></div>
-            <div id="log-viewer-view" class="hidden h-full"><iframe id="traffic-logs-iframe" src="about:blank"></iframe></div>
-            <div id="grafana-view" class="hidden h-full"><iframe src="http://10.3.0.40:3000"></iframe></div>
-            <div id="my-requests-view" class="hidden h-full"><iframe src="/my-requests-tool"></iframe></div>
-            <div id="my-objects-view" class="hidden h-full"><iframe src="/my-objects-tool"></iframe></div>
-            <div id="admin-approval-view" class="hidden h-full"><iframe id="approval-iframe" src="/admin-approval-tool"></iframe></div>
-            <div id="object-approval-view" class="hidden h-full"><iframe src="/object-approval-tool"></iframe></div>
-            <div id="audit-logs-view" class="hidden h-full"><iframe id="audit-logs-iframe" src="about:blank"></iframe></div>
+            <!-- Content Iframes (Hidden by default) - Absolute Full Coverage -->
+            <div id="palo-alto-view" class="hidden absolute inset-0 w-full h-full"><iframe id="rule-manager-iframe"
+                    src="/palo-manager" class="opacity-0 transition-opacity duration-500 w-full h-full"
+                    onload="this.classList.remove('opacity-0'); syncThemeToFrame(this)"></iframe></div>
+            <div id="object-creator-view" class="hidden absolute inset-0 w-full h-full"><iframe
+                    id="object-creator-iframe" src="/object-creator"
+                    class="opacity-0 transition-opacity duration-500 w-full h-full"
+                    onload="this.classList.remove('opacity-0'); syncThemeToFrame(this)"></iframe></div>
+            <div id="policy-match-view" class="hidden absolute inset-0 w-full h-full"><iframe src="/policy-match-tool"
+                    class="opacity-0 transition-opacity duration-500 w-full h-full"
+                    onload="this.classList.remove('opacity-0'); syncThemeToFrame(this)"></iframe></div>
+            <div id="policy-inventory-view" class="hidden absolute inset-0 w-full h-full"><iframe
+                    id="policy-inventory-iframe" src="about:blank"
+                    class="opacity-0 transition-opacity duration-500 w-full h-full"
+                    onload="this.classList.remove('opacity-0'); syncThemeToFrame(this)"></iframe></div>
+            <div id="log-viewer-view" class="hidden absolute inset-0 w-full h-full"><iframe id="traffic-logs-iframe"
+                    src="about:blank" class="opacity-0 transition-opacity duration-500 w-full h-full"
+                    onload="this.classList.remove('opacity-0'); syncThemeToFrame(this)"></iframe></div>
+            <div id="my-requests-view" class="hidden absolute inset-0 w-full h-full"><iframe src="/my-requests-tool"
+                    class="opacity-0 transition-opacity duration-500 w-full h-full"
+                    onload="this.classList.remove('opacity-0'); syncThemeToFrame(this)"></iframe></div>
+            <div id="my-objects-view" class="hidden absolute inset-0 w-full h-full"><iframe src="/my-objects-tool"
+                    class="opacity-0 transition-opacity duration-500 w-full h-full"
+                    onload="this.classList.remove('opacity-0'); syncThemeToFrame(this)"></iframe></div>
+            <div id="admin-approval-view" class="hidden absolute inset-0 w-full h-full"><iframe id="approval-iframe"
+                    src="/admin-approval-tool" class="opacity-0 transition-opacity duration-500 w-full h-full"
+                    onload="this.classList.remove('opacity-0'); syncThemeToFrame(this)"></iframe></div>
+            <div id="object-approval-view" class="hidden absolute inset-0 w-full h-full"><iframe
+                    src="/object-approval-tool" class="opacity-0 transition-opacity duration-500 w-full h-full"
+                    onload="this.classList.remove('opacity-0'); syncThemeToFrame(this)"></iframe></div>
+            <div id="audit-logs-view" class="hidden absolute inset-0 w-full h-full"><iframe id="audit-logs-iframe"
+                    src="about:blank" class="opacity-0 transition-opacity duration-500 w-full h-full"
+                    onload="this.classList.remove('opacity-0'); syncThemeToFrame(this)"></iframe></div>
 
         </main>
     </div>
 
+    <!-- Logic (Same as before) -->
     <script>
-        /**
-         * @constant {string[]} views - List of all available view IDs for management.
-         */
         const views = [
-            'palo-alto-view', 'object-creator-view', 'policy-match-view', 
-            'log-viewer-view', 'my-requests-view', 'my-objects-view', 
-            'admin-approval-view', 'object-approval-view', 'grafana-view',
+            'palo-alto-view', 'object-creator-view', 'policy-match-view',
+            'log-viewer-view', 'my-requests-view', 'my-objects-view',
+            'admin-approval-view', 'object-approval-view',
             'policy-inventory-view', 'audit-logs-view'
         ];
 
-        /**
-         * Toggles between different dashboard components with Lazy Loading support.
-         * @param {string} compId - The component identifier (e.g., 'palo-alto', 'log-viewer').
-         */
+        function syncThemeToFrame(iframe) {
+            if (!iframe) return;
+            const isLight = document.documentElement.classList.contains('light-mode');
+
+            // Limit retries
+            let attempts = 0;
+            const trySync = () => {
+                if (!iframe.contentDocument) return;
+
+                // Method 1: Direct DOM (Same Origin)
+                try {
+                    if (isLight) {
+                        iframe.contentDocument.documentElement.classList.add('light-mode');
+                    } else {
+                        iframe.contentDocument.documentElement.classList.remove('light-mode');
+                    }
+                } catch (e) { /* Ignore Cross-Origin */ }
+
+                // Method 2: PostMessage (Fallback)
+                try {
+                    iframe.contentWindow.postMessage({ type: 'THEME_CHANGE', isLight }, '*');
+                } catch (e) { }
+
+                attempts++;
+                if (attempts < 3) setTimeout(trySync, 300);
+            };
+
+            trySync();
+        }
+
+        function toggleDropdown(id) {
+            const el = document.getElementById(id);
+            el.classList.toggle('hidden');
+            const arrow = document.getElementById('fw-arrow');
+            if (arrow) arrow.style.transform = el.classList.contains('hidden') ? 'rotate(0deg)' : 'rotate(180deg)';
+        }
+
+        document.addEventListener('click', function (event) {
+            const container = document.getElementById('fw-mgmt-container');
+            const menu = document.getElementById('fw-menu');
+            if (container && !container.contains(event.target)) {
+                if (!menu.classList.contains('hidden')) {
+                    menu.classList.add('hidden');
+                    const arrow = document.getElementById('fw-arrow');
+                    if (arrow) arrow.style.transform = 'rotate(0deg)';
+                }
+            }
+        });
+
         function toggleComponent(compId) {
             closeAll();
             const view = document.getElementById(compId + '-view');
-            const btn = document.getElementById('btn-' + compId);
-            
-            // --- Lazy Loading Logic ---
-            
-            // Traffic Logs
+
+            // Lazy Loading Logic
             if (compId === 'log-viewer') {
                 const logsFrame = document.getElementById('traffic-logs-iframe');
-                if (logsFrame && logsFrame.src === "about:blank") logsFrame.src = "/log-viewer"; 
+                if (logsFrame && logsFrame.src === "about:blank") logsFrame.src = "/log-viewer";
             }
-
-            // Policy Inventory
             if (compId === 'policy-inventory') {
                 const invFrame = document.getElementById('policy-inventory-iframe');
-                if (invFrame && invFrame.src === "about:blank") invFrame.src = "/policy-inventory"; 
+                if (invFrame && invFrame.src === "about:blank") invFrame.src = "/policy-inventory";
             }
-
-            // Audit Logs
             if (compId === 'audit-logs') {
                 const auditFrame = document.getElementById('audit-logs-iframe');
-                if (auditFrame && auditFrame.src === "about:blank") auditFrame.src = "/audit-logs"; 
+                if (auditFrame && auditFrame.src === "about:blank") auditFrame.src = "/audit-logs";
             }
 
-            // Display UI
             if (view) {
                 view.classList.remove('hidden');
                 document.getElementById('welcome-view').classList.add('hidden');
+
+                // Force sync theme to the newly visible iframe
+                const iframe = view.querySelector('iframe');
+                if (iframe) syncThemeToFrame(iframe);
             }
-            if (btn) btn.classList.add('btn-active');
+
+            document.getElementById('fw-menu').classList.add('hidden');
+            document.getElementById('fw-arrow').style.transform = 'rotate(0deg)';
         }
 
         window.toggleComponent = toggleComponent;
 
-        /**
-         * Hides all views and shows the welcome screen.
-         */
         function closeAll() {
             views.forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.classList.add('hidden');
             });
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('btn-active'));
             document.getElementById('welcome-view').classList.remove('hidden');
         }
 
-        /**
-         * PostMessage Listener for cross-iframe communication.
-         */
-        window.addEventListener('message', function(event) {
+        window.addEventListener('message', function (event) {
             if (event.data.type === 'UPDATE_COUNTER') {
                 const targetId = event.data.source === 'rules' ? 'nav-rule-badge' : 'nav-obj-badge';
                 const badge = document.getElementById(targetId);
-                if(badge) badge.innerText = event.data.count;
+                const menuBadgeId = event.data.source === 'rules' ? 'menu-rule-badge' : 'menu-obj-badge';
+                const menuBadge = document.getElementById(menuBadgeId);
+
+                if (badge) {
+                    badge.innerText = event.data.count;
+                    badge.classList.toggle('hidden', event.data.count == 0);
+                }
+                if (menuBadge) {
+                    menuBadge.innerText = event.data.count;
+                    menuBadge.classList.toggle('hidden', event.data.count == 0);
+                }
             }
 
             if (event.data.type === 'FILL_RULE') {
-                toggleComponent('palo-alto'); 
+                toggleComponent('palo-alto');
                 setTimeout(() => {
                     const managerIframe = document.getElementById('rule-manager-iframe');
                     if (managerIframe && managerIframe.contentWindow) {
@@ -237,35 +592,38 @@
             }
         });
 
-        /**
-         * Periodically updates the pending approval badges from the API.
-         */
         async function updateBadges() {
             try {
                 const [rRes, oRes] = await Promise.all([
                     fetch('/get-admin-view-rules'),
                     fetch('/get-admin-view-objects')
                 ]);
-                
                 const rData = await rRes.json();
                 const oData = await oRes.json();
-                
+
                 const pendingRules = Array.isArray(rData) ? rData.filter(r => (r.status || '').toLowerCase() === 'pending').length : 0;
                 const pendingObjs = Array.isArray(oData) ? oData.filter(o => (o.status || '').toLowerCase() === 'pending').length : 0;
-                
-                const ruleBadge = document.getElementById('nav-rule-badge');
-                const objBadge = document.getElementById('nav-obj-badge');
-                
-                if(ruleBadge) ruleBadge.innerText = pendingRules;
-                if(objBadge) objBadge.innerText = pendingObjs;
-            } catch(e) {
+
+                const updateBadge = (id, count) => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        el.innerText = count;
+                        el.classList.toggle('hidden', count == 0);
+                    }
+                };
+
+                updateBadge('nav-rule-badge', pendingRules);
+                updateBadge('nav-obj-badge', pendingObjs);
+                updateBadge('menu-rule-badge', pendingRules);
+                updateBadge('menu-obj-badge', pendingObjs);
+            } catch (e) {
                 console.error("Badge sync error:", e);
             }
         }
-        
-        // --- Initialization ---
+
         setInterval(updateBadges, 15000);
         window.onload = updateBadges;
     </script>
 </body>
+
 </html>

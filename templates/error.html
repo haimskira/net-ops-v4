@@ -1,22 +1,33 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>שגיאה | NetOps Pro</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
     <style>
-        @font-face { font-family: 'Assistant'; src: url("{{ url_for('static', filename='fonts/Assistant-Regular.ttf') }}") format('truetype'); }
-        body { 
-            font-family: 'Assistant', sans-serif; 
-            background-color: #0f172a; 
-            color: #f8fafc; 
-            height: 100vh; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            margin: 0;
+        @font-face {
+            font-family: 'Assistant';
+            src: url("{{ url_for('static', filename='fonts/Assistant-Regular.ttf') }}") format('truetype');
         }
+
+        body {
+            font-family: 'Assistant', sans-serif;
+            background-color: var(--color-slate-950);
+            color: var(--color-slate-100);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+
+
         .error-card {
             background: rgba(30, 41, 59, 0.7);
             backdrop-filter: blur(12px);
@@ -27,6 +38,13 @@
             max-width: 500px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
+
+        .light-mode .error-card {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+        }
+
         .icon-circle {
             width: 80px;
             height: 80px;
@@ -40,8 +58,27 @@
             font-size: 40px;
             color: #ef4444;
         }
-        h1 { color: #f1f5f9; margin-bottom: 0.5rem; font-size: 24px; }
-        p { color: #94a3b8; line-height: 1.6; margin-bottom: 2rem; }
+
+        h1 {
+            color: var(--color-slate-100);
+            margin-bottom: 0.5rem;
+            font-size: 24px;
+        }
+
+        .light-mode h1 {
+            color: var(--color-slate-900);
+        }
+
+        p {
+            color: var(--color-slate-400);
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+
+        .light-mode p {
+            color: var(--color-slate-600);
+        }
+
         .btn-home {
             background: #4f46e5;
             color: white;
@@ -52,9 +89,14 @@
             transition: all 0.2s;
             display: inline-block;
         }
-        .btn-home:hover { background: #4338ca; transform: translateY(-2px); }
+
+        .btn-home:hover {
+            background: #4338ca;
+            transform: translateY(-2px);
+        }
     </style>
 </head>
+
 <body>
     <div class="error-card">
         <div class="icon-circle">!</div>
@@ -62,7 +104,8 @@
         <p>
             {{ message if message else "אין לך הרשאות מתאימות לגשת לנתיב זה או שהדף אינו קיים." }}
         </p>
-        <a href="/" class="btn-home">חזרה לדף הבית</a>
+        <a href="/" class="btn-home" target="_top">חזרה לדף הבית</a>
     </div>
 </body>
+
 </html>

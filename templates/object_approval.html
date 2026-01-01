@@ -1,66 +1,212 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
     <title>NetOps - Object Approval & History</title>
-    
+
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+
     <style>
         @font-face {
             font-family: 'Assistant';
             src: url("{{ url_for('static', filename='fonts/Assistant-Regular.ttf') }}") format('truetype');
             font-weight: 400;
         }
+
         @font-face {
             font-family: 'Assistant';
             src: url("{{ url_for('static', filename='fonts/Assistant-Bold.ttf') }}") format('truetype');
             font-weight: 700;
         }
-        body { font-family: 'Assistant', sans-serif !important; background-color: #0f172a; color: #f8fafc; padding: 20px; }
-        
-        .obj-card { transition: all 0.3s ease; border-width: 1px; }
-        .obj-approved { border-color: #10b981 !important; background: rgba(16, 185, 129, 0.05) !important; opacity: 0.85; }
-        .obj-rejected { border-color: #ef4444 !important; background: rgba(239, 68, 68, 0.05) !important; opacity: 0.85; }
-        .obj-pending { border-color: #334155; background: rgba(30, 41, 59, 0.4); }
 
-        .modal { backdrop-filter: blur(8px); background-color: rgba(15, 23, 42, 0.8); }
-        select, input, textarea { background-color: #1e293b !important; color: white !important; border: 1px solid #334155 !important; }
-        
-        .pop-in { animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-        @keyframes popIn { 0% { opacity: 0; transform: scale(0.9) translateY(20px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+        body {
+            font-family: 'Assistant', sans-serif !important;
+            background-color: var(--color-slate-950);
+            color: var(--color-slate-100);
+            padding: 20px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
 
-        .member-badge { background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.2); padding: 1px 6px; border-radius: 4px; font-size: 10px; margin: 1px; display: inline-block; color: #a5b4fc; }
-        .custom-scroll::-webkit-scrollbar { width: 4px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+
+
+        .obj-card {
+            transition: all 0.3s ease;
+            border-width: 1px;
+        }
+
+        .obj-approved {
+            border-color: #10b981 !important;
+            background: rgba(16, 185, 129, 0.05) !important;
+            opacity: 0.85;
+        }
+
+        .obj-rejected {
+            border-color: #ef4444 !important;
+            background: rgba(239, 68, 68, 0.05) !important;
+            opacity: 0.85;
+        }
+
+        .obj-pending {
+            border-color: var(--color-slate-700);
+            background: rgba(30, 41, 59, 0.4);
+        }
+
+        .light-mode .obj-pending {
+            border-color: var(--color-slate-300);
+            background: rgba(255, 255, 255, 0.6);
+        }
+
+        .modal {
+            backdrop-filter: blur(8px);
+            background-color: rgba(15, 23, 42, 0.8);
+        }
+
+        .light-mode .modal {
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+
+        select,
+        input,
+        textarea {
+            background-color: var(--color-slate-800) !important;
+            color: var(--color-slate-100) !important;
+            border: 1px solid var(--color-slate-700) !important;
+        }
+
+        .light-mode select,
+        .light-mode input,
+        .light-mode textarea {
+            background-color: var(--color-white) !important;
+            color: var(--color-slate-900) !important;
+            border: 1px solid var(--color-slate-300) !important;
+        }
+
+        .pop-in {
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes popIn {
+            0% {
+                opacity: 0;
+                transform: scale(0.9) translateY(20px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .member-badge {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            margin: 1px;
+            display: inline-block;
+            color: #a5b4fc;
+        }
+
+        .light-mode .member-badge {
+            color: #6366f1;
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .custom-scroll::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: var(--color-slate-700);
+            border-radius: 10px;
+        }
+
+        .light-mode .custom-scroll::-webkit-scrollbar-thumb {
+            background: var(--color-slate-300);
+        }
+
+        /* Styles for inner modal containers to support light mode */
+        .modal-content {
+            background-color: var(--color-slate-900);
+            border-color: var(--color-slate-700);
+        }
+
+        .light-mode .modal-content {
+            background-color: var(--color-white);
+            border-color: var(--color-slate-200);
+        }
 
         .custom-checkbox {
-            appearance: none; background-color: #1e293b; margin: 0; font: inherit; color: currentColor; width: 1.25em; height: 1.25em; border: 2px solid #a855f7; border-radius: 0.25em; display: grid; place-content: center; cursor: pointer;
+            appearance: none;
+            background-color: var(--color-slate-800);
+            margin: 0;
+            font: inherit;
+            color: currentColor;
+            width: 1.25em;
+            height: 1.25em;
+            border: 2px solid #a855f7;
+            border-radius: 0.25em;
+            display: grid;
+            place-content: center;
+            cursor: pointer;
         }
+
+        .light-mode .custom-checkbox {
+            background-color: white;
+            border-color: #9333ea;
+        }
+
         .custom-checkbox::before {
-            content: ""; width: 0.65em; height: 0.65em; transform: scale(0); transition: 120ms transform ease-in-out; box-shadow: inset 1em 1em white; transform-origin: center; clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+            content: "";
+            width: 0.65em;
+            height: 0.65em;
+            transform: scale(0);
+            transition: 120ms transform ease-in-out;
+            box-shadow: inset 1em 1em white;
+            transform-origin: center;
+            clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
         }
-        .custom-checkbox:checked::before { transform: scale(1); }
-        .custom-checkbox:checked { background-color: #a855f7; }
+
+        .custom-checkbox:checked::before {
+            transform: scale(1);
+        }
+
+        .custom-checkbox:checked {
+            background-color: #a855f7;
+        }
     </style>
 </head>
+
 <body>
-    
-    <div class="flex justify-between items-center mb-6 bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl sticky top-0 z-40">
+
+    <div
+        class="flex justify-between items-center mb-6 bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl sticky top-0 z-40 light-mode:bg-white light-mode:border-slate-200">
         <div>
             <h1 class="text-2xl font-bold text-purple-400">ניהול ואישור אובייקטים</h1>
             <p class="text-slate-500 text-sm">אישור בקשות חדשות וצפייה בהיסטוריית תשתית</p>
         </div>
-        
+
         <div class="flex gap-4 items-center">
-            <div id="bulk-toolbar" class="hidden flex items-center gap-3 bg-slate-800 px-4 py-2 rounded-xl border border-slate-700">
-                <span id="selected-count" class="text-white font-bold text-sm ml-2">0 נבחרו</span>
-                <button onclick="bulkReject()" class="text-rose-400 border border-rose-600/30 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-rose-600 hover:text-white transition-colors">דחה מסומנים</button>
-                <button onclick="bulkApprove()" class="bg-purple-600 hover:bg-purple-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors shadow-lg">אשר מסומנים</button>
+            <div id="bulk-toolbar"
+                class="hidden flex items-center gap-3 bg-slate-800 px-4 py-2 rounded-xl border border-slate-700 light-mode:bg-slate-100 light-mode:border-slate-300">
+                <span id="selected-count" class="text-white font-bold text-sm ml-2 light-mode:text-slate-800">0
+                    נבחרו</span>
+                <button onclick="bulkReject()"
+                    class="text-rose-400 border border-rose-600/30 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-rose-600 hover:text-white transition-colors">דחה
+                    מסומנים</button>
+                <button onclick="bulkApprove()"
+                    class="bg-purple-600 hover:bg-purple-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-colors shadow-lg">אשר
+                    מסומנים</button>
             </div>
 
-            <div class="h-8 w-px bg-slate-700 mx-2"></div>
+            <div class="h-8 w-px bg-slate-700 mx-2 light-mode:bg-slate-300"></div>
 
-            <button onclick="loadObjects()" class="bg-slate-800 hover:bg-slate-700 p-3 rounded-xl transition-all border border-slate-700 text-slate-400 hover:text-white">
+            <button onclick="loadObjects()"
+                class="bg-slate-800 hover:bg-slate-700 p-3 rounded-xl transition-all border border-slate-700 text-slate-400 hover:text-white light-mode:bg-slate-100 light-mode:border-slate-300 light-mode:text-slate-500 light-mode:hover:text-purple-600">
                 <span class="text-xl">🔄</span>
             </button>
         </div>
@@ -69,20 +215,27 @@
     <div id="objects-container" class="space-y-4 pb-20"></div>
 
     <div id="confirmModal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4 modal">
-        <div class="bg-slate-900 border border-purple-500/30 p-8 rounded-3xl w-full max-w-sm shadow-2xl text-center pop-in relative overflow-hidden">
+        <div
+            class="modal-content border border-purple-500/30 p-8 rounded-3xl w-full max-w-sm shadow-2xl text-center pop-in relative overflow-hidden">
             <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-purple-500 to-fuchsia-600"></div>
-            <h3 class="text-2xl font-bold text-white mb-2">אישור אובייקטים</h3>
-            <p id="confirmMessage" class="text-slate-400 text-sm mb-8 px-4">האם אתה בטוח? הפעולה תיצור את האובייקטים בפיירוול.</p>
+            <h3 class="text-2xl font-bold text-white mb-2 light-mode:text-slate-800">אישור אובייקטים</h3>
+            <p id="confirmMessage" class="text-slate-400 text-sm mb-8 px-4 light-mode:text-slate-600">האם אתה בטוח?
+                הפעולה תיצור את האובייקטים בפיירוול.</p>
             <div class="flex gap-3 justify-center">
-                <button onclick="closeConfirmModal()" class="px-6 py-2.5 rounded-xl text-slate-400 hover:bg-slate-800 transition-all font-bold text-sm">ביטול</button>
-                <button onclick="executeBulkApprove()" class="px-6 py-2.5 rounded-xl bg-purple-600 text-white font-bold shadow-lg text-sm transition-all">כן, בצע אישור</button>
+                <button onclick="closeConfirmModal()"
+                    class="px-6 py-2.5 rounded-xl text-slate-400 hover:bg-slate-800 transition-all font-bold text-sm light-mode:text-slate-500 light-mode:hover:bg-slate-100">ביטול</button>
+                <button onclick="executeBulkApprove()"
+                    class="px-6 py-2.5 rounded-xl bg-purple-600 text-white font-bold shadow-lg text-sm transition-all">כן,
+                    בצע אישור</button>
             </div>
         </div>
     </div>
 
     <div id="editModal" class="hidden fixed inset-0 z-50 flex items-center justify-center modal p-4">
-        <div class="bg-slate-900 border border-slate-700 w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden pop-in">
-            <div class="p-6 border-b border-slate-800 bg-purple-600/10 flex justify-between items-center">
+        <div
+            class="modal-content border border-slate-700 w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden pop-in light-mode:border-slate-200">
+            <div
+                class="p-6 border-b border-slate-800 bg-purple-600/10 flex justify-between items-center light-mode:border-slate-200">
                 <h2 class="text-xl font-bold text-purple-400">עריכת פרטי בקשה</h2>
             </div>
             <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-6" id="editForm">
@@ -111,20 +264,28 @@
                     </select>
                 </div>
             </div>
-            <div class="p-6 bg-slate-900/50 flex justify-end gap-3 border-t border-slate-800">
-                <button onclick="closeEdit()" class="px-6 py-2 rounded-xl text-slate-400 hover:bg-slate-800 transition-all font-bold text-sm">ביטול</button>
-                <button onclick="saveEdit()" class="px-8 py-2 rounded-xl bg-purple-600 text-white hover:bg-purple-500 font-bold shadow-lg text-sm">שמור עדכון</button>
+            <div
+                class="p-6 bg-slate-900/50 flex justify-end gap-3 border-t border-slate-800 light-mode:bg-slate-100 light-mode:border-slate-200">
+                <button onclick="closeEdit()"
+                    class="px-6 py-2 rounded-xl text-slate-400 hover:bg-slate-800 transition-all font-bold text-sm light-mode:text-slate-600 light-mode:hover:bg-slate-200">ביטול</button>
+                <button onclick="saveEdit()"
+                    class="px-8 py-2 rounded-xl bg-purple-600 text-white hover:bg-purple-500 font-bold shadow-lg text-sm">שמור
+                    עדכון</button>
             </div>
         </div>
     </div>
 
     <div id="rejectModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 modal">
-        <div class="bg-slate-900 border border-slate-700 p-6 rounded-2xl w-full max-w-md shadow-2xl pop-in">
+        <div class="modal-content border border-slate-700 p-6 rounded-2xl w-full max-w-md shadow-2xl pop-in">
             <h3 class="text-xl font-bold text-rose-400 mb-4">דחיית בקשה</h3>
-            <textarea id="rejectReason" class="w-full bg-slate-800 border border-slate-700 rounded-xl p-4 text-white mb-6 h-32 outline-none focus:border-rose-500" placeholder="הסבר למשתמש מדוע הבקשה נדחתה..."></textarea>
+            <textarea id="rejectReason"
+                class="w-full bg-slate-800 border border-slate-700 rounded-xl p-4 text-white mb-6 h-32 outline-none focus:border-rose-500 light-mode:bg-white light-mode:text-slate-800 light-mode:border-slate-300"
+                placeholder="הסבר למשתמש מדוע הבקשה נדחתה..."></textarea>
             <div class="flex justify-end gap-3 font-bold">
-                <button onclick="closeRejectModal()" class="text-slate-400 hover:text-white px-4 py-2">ביטול</button>
-                <button id="confirmRejectBtn" class="bg-rose-600 hover:bg-rose-500 text-white px-6 py-2 rounded-xl">בצע דחייה</button>
+                <button onclick="closeRejectModal()"
+                    class="text-slate-400 hover:text-white px-4 py-2 light-mode:text-slate-500 light-mode:hover:text-slate-800">ביטול</button>
+                <button id="confirmRejectBtn" class="bg-rose-600 hover:bg-rose-500 text-white px-6 py-2 rounded-xl">בצע
+                    דחייה</button>
             </div>
         </div>
     </div>
@@ -143,9 +304,9 @@
             try {
                 const res = await fetch('/get-admin-view-objects');
                 allObjects = await res.json();
-                
+
                 // עדכון המונה ב-Navbar של ה-Parent (רק בקשות Pending)
-                const pendingCount = allObjects.filter(o => (o.status||'').toLowerCase() === 'pending').length;
+                const pendingCount = allObjects.filter(o => (o.status || '').toLowerCase() === 'pending').length;
                 window.parent.postMessage({ type: 'UPDATE_COUNTER', source: 'objects', count: pendingCount }, '*');
 
                 renderUI();
@@ -208,7 +369,7 @@
             document.getElementById('rejectModal').classList.remove('hidden');
         }
 
-        document.getElementById('confirmRejectBtn').onclick = async function() {
+        document.getElementById('confirmRejectBtn').onclick = async function () {
             const reason = document.getElementById('rejectReason').value.trim();
             if (!reason) return alert("חובה להזין סיבה.");
 
@@ -216,7 +377,7 @@
             for (let id of ids) {
                 await fetch(`/reject-object/${id}`, {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ reason: reason })
                 });
             }
@@ -240,7 +401,7 @@
             const type = (obj.obj_type || obj.type || '').toLowerCase();
             document.getElementById('field_prefix').classList.toggle('hidden', !type.includes('address') || type.includes('group'));
             document.getElementById('field_protocol').classList.toggle('hidden', !type.includes('service') || type.includes('group'));
-            
+
             if (obj.prefix) document.getElementById('edit_prefix').value = obj.prefix;
             if (obj.protocol) document.getElementById('edit_protocol').value = obj.protocol;
         }
@@ -258,12 +419,12 @@
             try {
                 await fetch(`/update-pending-object/${id}`, {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
                 closeEdit();
                 loadObjects();
-            } catch(e) { alert("שגיאה בעדכון"); }
+            } catch (e) { alert("שגיאה בעדכון"); }
         }
 
         // --- בניית הממשק (Render UI) ---
@@ -277,7 +438,7 @@
             container.innerHTML = allObjects.map(obj => {
                 const status = (obj.status || 'Pending').toLowerCase();
                 let statusClass = status === 'approved' ? "obj-approved" : status === 'rejected' ? "obj-rejected" : "obj-pending";
-                
+
                 let badgeColor = status === 'approved' ? 'text-emerald-500 bg-emerald-500/10' : status === 'rejected' ? 'text-rose-500 bg-rose-500/10' : 'text-orange-400 bg-orange-400/10';
                 let statusLabel = status === 'approved' ? '✔ אושר' : status === 'rejected' ? '✘ נדחה' : '⏳ ממתין';
 
@@ -290,7 +451,7 @@
                     const members = obj.value ? obj.value.split(',') : [];
                     displayVal = members.map(m => `<span class="member-badge">${m.trim()}</span>`).join('');
                 } else {
-                    displayVal = `<span class="font-mono text-slate-300 text-xs">${obj.value}${obj.prefix ? '/'+obj.prefix : ''} ${obj.protocol ? '['+obj.protocol+']' : ''}</span>`;
+                    displayVal = `<span class="font-mono text-slate-300 text-xs light-mode:text-slate-600">${obj.value}${obj.prefix ? '/' + obj.prefix : ''} ${obj.protocol ? '[' + obj.protocol + ']' : ''}</span>`;
                 }
 
                 return `
@@ -300,9 +461,9 @@
                     </div>
                     
                     <div class="grid grid-cols-5 gap-6 flex-1 text-right text-sm items-center">
-                        <div><p class="text-slate-500 text-[10px] mb-1 italic">מבקש</p><p class="font-bold text-slate-200 truncate">👤 ${obj.requested_by}</p></div>
+                        <div><p class="text-slate-500 text-[10px] mb-1 italic">מבקש</p><p class="font-bold text-slate-200 truncate light-mode:text-slate-800">👤 ${obj.requested_by}</p></div>
                         <div><p class="text-slate-500 text-[10px] mb-1">סוג</p><p class="text-indigo-400 font-black text-[11px] tracking-widest">${type}</p></div>
-                        <div><p class="text-slate-500 text-[10px] mb-1">שם</p><p class="font-mono text-purple-300 font-bold truncate text-xs" title="${obj.name}">${obj.name}</p></div>
+                        <div><p class="text-slate-500 text-[10px] mb-1">שם</p><p class="font-mono text-purple-300 font-bold truncate text-xs light-mode:text-purple-600" title="${obj.name}">${obj.name}</p></div>
                         <div class="col-span-1">
                             <p class="text-slate-500 text-[10px] mb-1">ערך / חברים</p>
                             <div class="max-h-12 overflow-y-auto custom-scroll">${displayVal}</div>
@@ -314,20 +475,20 @@
 
                     <div class="flex gap-2 mr-6 min-w-[150px] justify-end">
                         ${status === 'pending' ? `
-                            <button onclick="openEdit(${obj.id})" class="bg-slate-700 p-2 rounded-xl hover:bg-purple-600 transition-all">📝</button>
+                            <button onclick="openEdit(${obj.id})" class="bg-slate-700 p-2 rounded-xl hover:bg-purple-600 transition-all light-mode:bg-slate-200 light-mode:text-slate-600 light-mode:hover:text-white">📝</button>
                             <button onclick="openRejectModal(${obj.id})" class="text-rose-400 border border-rose-600/30 px-3 py-1.5 rounded-xl text-xs font-bold hover:bg-rose-600 hover:text-white">דחייה</button>
                             <button onclick="selectedObjects.add(${obj.id}); bulkApprove();" class="bg-purple-600 hover:bg-purple-500 text-white px-5 py-1.5 rounded-xl text-xs font-bold shadow-lg">אשר</button>
                         ` : `
                             <div class="text-left">
                                 <p class="text-slate-500 text-[9px] uppercase font-bold">תאריך פעולה:</p>
-                                <p class="text-[10px] text-slate-400 font-mono">${obj.request_time || 'N/A'}</p>
+                                <p class="text-[10px] text-slate-400 font-mono light-mode:text-slate-600">${obj.request_time || 'N/A'}</p>
                             </div>
                         `}
                     </div>
                 </div>
                 ${obj.admin_notes ? `
                     <div class="mr-14 mb-4 mt-1 p-3 bg-indigo-500/5 border-r-2 border-indigo-500/20 rounded-l-xl">
-                        <p class="text-xs text-slate-400 italic">💬 הערת אדמין: ${obj.admin_notes}</p>
+                        <p class="text-xs text-slate-400 italic light-mode:text-slate-600">💬 הערת אדמין: ${obj.admin_notes}</p>
                     </div>` : ''}
                 `;
             }).join('');
@@ -337,4 +498,5 @@
         setInterval(loadObjects, 30000);
     </script>
 </body>
+
 </html>

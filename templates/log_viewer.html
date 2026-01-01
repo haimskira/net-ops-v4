@@ -1,9 +1,13 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
-    
+
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+    <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+
     <style>
         @font-face {
             font-family: 'Assistant';
@@ -11,65 +15,106 @@
             font-weight: 400;
             font-style: normal;
         }
+
         @font-face {
             font-family: 'Assistant';
             src: url("{{ url_for('static', filename='fonts/Assistant-Bold.ttf') }}") format('truetype');
             font-weight: 700;
             font-style: normal;
         }
-        body { font-family: 'Assistant', sans-serif !important; }
-    </style>
 
-    
-    <style>
-        body { font-family: 'Assistant', sans-serif; background-color: #0f172a; color: #f8fafc; }
-        
+        body {
+            font-family: 'Assistant', sans-serif;
+            background-color: var(--color-slate-950);
+            color: var(--color-slate-100);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
         /* עיצוב שורת לוג */
-        .log-row { transition: all 0.2s; border-left: 3px solid transparent; }
-        .log-row:hover { background-color: rgba(30, 41, 59, 0.8); cursor: context-menu; }
-        
+        .log-row {
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        .log-row:hover {
+            background-color: var(--color-slate-800);
+            cursor: context-menu;
+        }
+
         /* Glass Effect */
-        .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
-        
+        .glass-panel {
+            background: var(--color-slate-800);
+            border: 1px solid var(--color-slate-700);
+        }
+
         /* Search Input */
-        .search-input { background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.1); color: white; }
-        .search-input:focus { border-color: #6366f1; outline: none; box-shadow: 0 0 10px rgba(99, 102, 241, 0.2); }
-        
+        .search-input {
+            background: var(--color-slate-900);
+            border: 1px solid var(--color-slate-700);
+            color: var(--color-slate-100);
+        }
+
+        .search-input:focus {
+            border-color: var(--color-indigo-500);
+            outline: none;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.2);
+        }
+
         /* סקרולר מותאם אישית */
-        .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
-        .custom-scroll::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
-        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        .custom-scroll::-webkit-scrollbar-track {
+            background: var(--color-slate-950);
+        }
+
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: var(--color-slate-600);
+            border-radius: 3px;
+        }
+
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+            background: var(--color-slate-500);
+        }
 
         /* הגדרת כיווניות שמאל לימין לטבלה */
-        .dir-ltr { direction: ltr; text-align: left; }
+        .dir-ltr {
+            direction: ltr;
+            text-align: left;
+        }
     </style>
 </head>
+
 <body class="p-4 bg-transparent h-screen flex flex-col overflow-hidden">
-    
+
     <div class="mb-4 flex flex-col md:flex-row gap-4 items-center justify-between glass-panel p-3 rounded-xl shrink-0">
         <div class="relative w-full md:w-96">
             <span class="absolute inset-y-0 right-3 flex items-center text-slate-400">🔍</span>
-            <input type="text" id="logSearch" oninput="renderLogs()" placeholder="חיפוש חופשי (IP, Zone, App, Action...)" 
-                   class="search-input w-full pr-10 pl-4 py-2 rounded-lg text-sm">
+            <input type="text" id="logSearch" oninput="renderLogs()"
+                placeholder="חיפוש חופשי (IP, Zone, App, Action...)"
+                class="search-input w-full pr-10 pl-4 py-2 rounded-lg text-sm">
         </div>
-        
+
         <div class="flex items-center gap-3">
-            <button id="toggleLogsBtn" onclick="toggleLogs()" 
-                    class="flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm transition-all bg-indigo-600 hover:bg-indigo-500 shadow-lg shadow-indigo-500/20">
+            <button id="toggleLogsBtn" onclick="toggleLogs()"
+                class="flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm transition-all bg-indigo-600 hover:bg-indigo-500 shadow-lg shadow-indigo-500/20 text-white">
                 <span id="btnIcon">⏸️</span>
                 <span id="btnText">עצור לוגים</span>
             </button>
-            <span id="logCounter" class="text-xs text-slate-500 bg-slate-800 px-3 py-2 rounded-lg border border-slate-700 font-mono">
+            <span id="logCounter"
+                class="text-xs text-slate-400 bg-slate-900 px-3 py-2 rounded-lg border border-slate-700 font-mono">
                 0 לוגים בזיכרון
             </span>
         </div>
     </div>
 
-    <div class="flex-1 overflow-hidden rounded-xl border border-slate-700 bg-slate-900/50 shadow-2xl flex flex-col">
+    <div class="flex-1 overflow-hidden rounded-xl border border-slate-700 bg-slate-900 shadow-2xl flex flex-col">
         <div class="overflow-auto custom-scroll flex-1">
             <table class="w-full text-sm dir-ltr">
-                <thead class="bg-slate-950 text-slate-400 uppercase text-xs border-b border-slate-800 sticky top-0 z-10 shadow-md">
+                <thead
+                    class="bg-slate-950 text-slate-400 uppercase text-xs border-b border-slate-800 sticky top-0 z-10 shadow-md">
                     <tr>
                         <th class="p-4 w-24">Time</th>
                         <th class="p-4">Source</th>
@@ -79,66 +124,68 @@
                         <th class="p-4 w-24 text-center">Action</th>
                     </tr>
                 </thead>
-                <tbody id="logs-body" class="divide-y divide-slate-800/50 font-mono text-xs">
-                    </tbody>
+                <tbody id="logs-body" class="divide-y divide-slate-800 font-mono text-xs text-slate-200">
+                </tbody>
             </table>
         </div>
     </div>
 
     <div id="context-menu" class="hidden absolute glass-panel rounded-xl shadow-2xl p-1 z-50 min-w-[180px]" dir="rtl">
-        <button onclick="createRuleFromMenu()" class="w-full text-right px-4 py-2 hover:bg-indigo-600 rounded-lg flex items-center gap-2 transition-colors text-slate-200">
+        <button onclick="createRuleFromMenu()"
+            class="w-full text-right px-4 py-2 hover:bg-indigo-600 rounded-lg flex items-center gap-2 transition-colors text-slate-200 hover:text-white">
             <span>🛡️</span>
             <span class="text-sm font-bold">צור חוקה ב-Rule Manager</span>
         </button>
     </div>
 
     <script>
-    let allLogs = [];
-    let isPaused = false;
-    let selectedLog = null;
+        let allLogs = [];
+        let isPaused = false;
+        let selectedLog = null;
 
-    async function fetchLogs() {
-        if (isPaused) return;
-        try {
-            const res = await fetch('/get-live-logs');
-            allLogs = await res.json();
-            document.getElementById('logCounter').innerText = `${allLogs.length} לוגים בזיכרון`;
-            renderLogs();
-        } catch (e) { console.error("Error fetching logs:", e); }
-    }
-
-    function renderLogs() {
-        const searchTerm = document.getElementById('logSearch').value.toLowerCase();
-        const body = document.getElementById('logs-body');
-        
-        // סינון לפי כל השדות החדשים
-        const filteredLogs = allLogs.filter(log => {
-            const logString = `${log.time} ${log.source} ${log.destination} ${log.src_zone} ${log.dst_zone} ${log.protocol} ${log.dst_port} ${log.app} ${log.action}`.toLowerCase();
-            return logString.includes(searchTerm);
-        });
-
-        if (filteredLogs.length === 0) {
-            body.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-500 italic">אין לוגים להצגה...</td></tr>';
-            return;
+        async function fetchLogs() {
+            if (isPaused) return;
+            try {
+                const res = await fetch('/get-live-logs');
+                allLogs = await res.json();
+                document.getElementById('logCounter').innerText = `${allLogs.length} לוגים בזיכרון`;
+                renderLogs();
+            } catch (e) { console.error("Error fetching logs:", e); }
         }
 
-        body.innerHTML = filteredLogs.map(log => {
-            // צבע ל-Action
-            let actionClass = 'text-slate-400 bg-slate-800 border-slate-700'; // Default
-            if (log.action === 'allow') actionClass = 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20';
-            else if (log.action === 'deny' || log.action === 'drop') actionClass = 'text-rose-400 bg-rose-400/10 border-rose-400/20';
+        function renderLogs() {
+            const searchTerm = document.getElementById('logSearch').value.toLowerCase();
+            const body = document.getElementById('logs-body');
 
-            // הדגשת פורטים נפוצים
-            let portDisplay = log.dst_port;
-            if (['80', '443', '22', '53', '3389'].includes(log.dst_port)) {
-                portDisplay = `<span class="text-slate-200 font-bold">${log.dst_port}</span>`;
+            // סינון לפי כל השדות החדשים
+            const filteredLogs = allLogs.filter(log => {
+                const logString = `${log.time} ${log.source} ${log.destination} ${log.src_zone} ${log.dst_zone} ${log.protocol} ${log.dst_port} ${log.app} ${log.action}`.toLowerCase();
+                return logString.includes(searchTerm);
+            });
+
+            if (filteredLogs.length === 0) {
+                body.innerHTML = '<tr><td colspan="6" class="p-8 text-center text-slate-500 italic">אין לוגים להצגה...</td></tr>';
+                return;
             }
 
-            // JSON stringify בטוח לשימוש בתוך ה-HTML Attribute
-            const logJson = JSON.stringify(log).replace(/"/g, '&quot;');
+            body.innerHTML = filteredLogs.map(log => {
+                // צבע ל-Action
+                let actionClass = 'text-slate-400 bg-slate-800 border-slate-700'; // Default
+                if (log.action === 'allow') actionClass = 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20';
+                else if (log.action === 'deny' || log.action === 'drop') actionClass = 'text-rose-400 bg-rose-400/10 border-rose-400/20';
 
-            return `
-            <tr class="log-row hover:bg-slate-800/50" oncontextmenu="showContextMenu(event, ${logJson})">
+                // הדגשת פורטים נפוצים
+                let portDisplay = log.dst_port;
+                if (['80', '443', '22', '53', '3389'].includes(log.dst_port)) {
+                    // Use a class for bold text that inverts correctly if needed, though slate-200 is fine usually
+                    portDisplay = `<span class="text-slate-200 font-bold">${log.dst_port}</span>`;
+                }
+
+                // JSON stringify בטוח לשימוש בתוך ה-HTML Attribute
+                const logJson = JSON.stringify(log).replace(/"/g, '&quot;');
+
+                return `
+            <tr class="log-row hover:bg-slate-800" oncontextmenu="showContextMenu(event, ${logJson})">
                 <td class="p-3 text-slate-400 whitespace-nowrap">${log.time}</td>
                 
                 <td class="p-3">
@@ -160,7 +207,7 @@
                 </td>
 
                 <td class="p-3">
-                    <span class="px-2 py-1 rounded bg-slate-800 text-slate-300 border border-slate-700 text-[11px]">
+                    <span class="px-2 py-1 rounded bg-slate-900 text-slate-300 border border-slate-700 text-[11px]">
                         ${log.app}
                     </span>
                 </td>
@@ -179,56 +226,57 @@
                 </td>
             </tr>
             `;
-        }).join('');
-    }
-
-    function toggleLogs() {
-        isPaused = !isPaused;
-        const btn = document.getElementById('toggleLogsBtn');
-        const icon = document.getElementById('btnIcon');
-        const text = document.getElementById('btnText');
-        if (isPaused) {
-            btn.className = "flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm transition-all bg-emerald-600 hover:bg-emerald-500 shadow-lg shadow-emerald-500/20";
-            icon.innerText = "▶️"; text.innerText = "המשך לוגים";
-        } else {
-            btn.className = "flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm transition-all bg-indigo-600 hover:bg-indigo-500 shadow-lg shadow-indigo-500/20";
-            icon.innerText = "⏸️"; text.innerText = "עצור לוגים";
-            fetchLogs();
+            }).join('');
         }
-    }
 
-    function showContextMenu(e, log) {
-        e.preventDefault();
-        selectedLog = log;
-        const menu = document.getElementById('context-menu');
-        
-        // חישוב מיקום שלא יצא מהמסך
-        let top = e.pageY;
-        let left = e.pageX;
-        
-        menu.style.top = `${top}px`;
-        menu.style.left = `${left}px`;
-        menu.classList.remove('hidden');
-    }
+        function toggleLogs() {
+            isPaused = !isPaused;
+            const btn = document.getElementById('toggleLogsBtn');
+            const icon = document.getElementById('btnIcon');
+            const text = document.getElementById('btnText');
+            if (isPaused) {
+                btn.className = "flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm transition-all bg-emerald-600 hover:bg-emerald-500 shadow-lg shadow-emerald-500/20 text-white";
+                icon.innerText = "▶️"; text.innerText = "המשך לוגים";
+            } else {
+                btn.className = "flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-sm transition-all bg-indigo-600 hover:bg-indigo-500 shadow-lg shadow-indigo-500/20 text-white";
+                icon.innerText = "⏸️"; text.innerText = "עצור לוגים";
+                fetchLogs();
+            }
+        }
 
-    function createRuleFromMenu() {
-        if (selectedLog) {
-            window.parent.postMessage({ 
-                type: 'FILL_RULE', 
-                data: selectedLog 
-            }, '*');
+        function showContextMenu(e, log) {
+            e.preventDefault();
+            selectedLog = log;
+            const menu = document.getElementById('context-menu');
+
+            // חישוב מיקום שלא יצא מהמסך
+            let top = e.pageY;
+            let left = e.pageX;
+
+            menu.style.top = `${top}px`;
+            menu.style.left = `${left}px`;
+            menu.classList.remove('hidden');
+        }
+
+        function createRuleFromMenu() {
+            if (selectedLog) {
+                window.parent.postMessage({
+                    type: 'FILL_RULE',
+                    data: selectedLog
+                }, '*');
+                document.getElementById('context-menu').classList.add('hidden');
+            }
+        }
+
+        // סגירת התפריט בלחיצה בכל מקום אחר
+        document.addEventListener('click', () => {
             document.getElementById('context-menu').classList.add('hidden');
-        }
-    }
+        });
 
-    // סגירת התפריט בלחיצה בכל מקום אחר
-    document.addEventListener('click', () => {
-        document.getElementById('context-menu').classList.add('hidden');
-    });
-
-    setInterval(fetchLogs, 2000); // רענון כל 2 שניות
-    fetchLogs();
+        setInterval(fetchLogs, 2000); // רענון כל 2 שניות
+        fetchLogs();
     </script>
 
 </body>
+
 </html>
