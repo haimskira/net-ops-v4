@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>Audit Logs | Inventory Pro</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <style>
+        body { font-family: 'Assistant', sans-serif; background-color: #0f172a; color: #f8fafc; padding: 20px; margin: 0; }
+        .glass-panel { 
+            background: rgba(30, 41, 59, 0.7); 
+            backdrop-filter: blur(12px); 
+            border: 1px solid rgba(255,255,255,0.05); 
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+        .table-container { max-height: calc(100vh - 150px); overflow-y: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: right; }
+        thead th { 
+            position: sticky; 
+            top: 0; 
+            background: #1e293b; 
+            padding: 15px; 
+            color: #94a3b8; 
+            font-size: 12px; 
+            border-bottom: 2px solid #334155;
+            z-index: 10;
+        }
+        tbody tr { border-bottom: 1px solid rgba(255,255,255,0.05); transition: background 0.2s; }
+        tbody tr:hover { background: rgba(255,255,255,0.02); }
+        td { padding: 12px 15px; font-size: 13px; color: #cbd5e1; }
+        .timestamp { color: #6366f1; font-family: monospace; font-size: 12px; }
+        .user-tag { background: #334155; padding: 2px 8px; border-radius: 6px; font-weight: bold; color: #e2e8f0; }
+        .action-badge { 
+            padding: 4px 10px; 
+            border-radius: 8px; 
+            font-size: 11px; 
+            font-weight: bold; 
+            background: rgba(99, 102, 241, 0.1); 
+            color: #818cf8;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mb-6 flex justify-between items-center" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <div>
+            <h1 style="color: #818cf8; margin: 0;">יומן פעולות (Audit Logs)</h1>
+            <p style="color: #64748b; margin: 5px 0 0 0; font-size: 14px;">מעקב אחר שינויי קונפיגורציה ופעולות מנהל</p>
+        </div>
+        <button onclick="window.location.reload()" style="background: #334155; color: white; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer;">רענן לוגים 🔄</button>
+    </div>
+
+    <div class="glass-panel">
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 180px;">זמן</th>
+                        <th style="width: 120px;">משתמש</th>
+                        <th style="width: 150px;">פעולה</th>
+                        <th style="width: 150px;">סוג משאב</th>
+                        <th>שם המשאב / פרטים</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr>
+                        <td class="timestamp">{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                        <td><span class="user-tag">{{ log.user }}</span></td>
+                        <td><span class="action-badge">{{ log.action }}</span></td>
+                        <td style="color: #94a3b8;">{{ log.resource_type }}</td>
+                        <td>
+                            <div style="font-weight: bold; color: #f1f5f9;">{{ log.resource_name }}</div>
+                            <div style="font-size: 11px; color: #64748b; margin-top: 4px;">{{ log.details }}</div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 40px; color: #475569;">לא נמצאו פעולות ביומן</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</body>
+</html>
